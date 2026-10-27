@@ -80,6 +80,11 @@ class GCVLNBenchmarkEnv(GCVLNEnv):
     def teleport(self, pos: Any, rotation: Any) -> None:
         self._teleport_guard(pos, rotation)
 
+    def close(self) -> None:
+        self._trajectory.close()
+        self._runtime_instrumentation.write()
+        super().close()
+
 
 class GoalFreeBenchmarkAgent(Agent):
     """Keep GC-VLN policy intact while replacing its goal-dependent result shell."""

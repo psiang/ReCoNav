@@ -180,17 +180,17 @@ class G0VectorEnv:
             if done:
                 self.trajectory.primitive(0, *self.pose(), done=True)
                 self.instrumentation.primitive()
-            self.trajectory.write()
-            self.instrumentation.write()
             return [(self.observation(), 0., done,
                      {'action_valid': result, 'pre_point': ','.join(str(int(x)) for x in point) if point is not None else '',
                       'steps_taken': len(self.trajectory.records)-1,
-                      'path_length': self.trajectory.payload()['path_length_m']})]
+                      'path_length': self.trajectory.path_length_m})]
         except Exception as exc:
             self.instrumentation.exception(exc, source='G0VectorEnv.step')
             raise
 
     def close(self):
+        self.trajectory.close()
+        self.instrumentation.write()
         if self.renderer is not None:
             self.renderer.close()
             self.renderer = None

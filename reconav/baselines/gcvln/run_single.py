@@ -424,6 +424,13 @@ def main() -> int:
     instrumentation["environment_runtime_exceptions"] = env_instrumentation[
         "runtime_exceptions"
     ]
+    recording = {
+        'trajectory': json.loads((args.output / 'trajectory_recording.json').read_text(encoding='utf-8')),
+        'instrumentation_write_seconds': sum(
+            json.loads((args.output / name).read_text(encoding='utf-8'))['seconds']
+            for name in ('runtime_instrumentation.timing.json', 'runtime_instrumentation_env.timing.json')
+        ),
+    }
     if instrumentation['runtime_exception_count'] or instrumentation['environment_runtime_exceptions']:
         # The original policy catches exceptions and returns STOP. That is an
         # infrastructure failure, never evidence of unsuccessful reasoning.
@@ -433,6 +440,7 @@ def main() -> int:
         (args.output/'trajectory.json').write_text(json.dumps(trajectory, indent=2)+'\n')
         (args.output/'runtime_summary.json').write_text(json.dumps({
             'status': 'runtime_failure', 'instrumentation': instrumentation,
+            'recording': recording,
             'scoring_completed': False, 'trajectory': {key: trajectory[key] for key in
                 ('executed_actions', 'recorded_poses', 'termination', 'path_length_m')}}, indent=2)+'\n')
         (args.output/'metrics.json').write_text(json.dumps({
@@ -446,6 +454,7 @@ def main() -> int:
         "parser_gate": parser_gate,
         "preprocess_response_id": metadata["call"].get("response_id") if metadata else None,
         "instrumentation": instrumentation,
+        "recording": recording,
         "teleflag": False,
         "oracle_sensors": [],
         "failure_reason": "no_executable_plan" if prediction_empty else None,

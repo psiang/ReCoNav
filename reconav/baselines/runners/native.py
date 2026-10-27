@@ -275,6 +275,8 @@ def main():
             else:
                 execute(command, cell, 'rollout', env, args.timeout, budget)
             native, trajectory = validate_native_completion(args.method, cell)
+            if args.method == 'gcvln' and 'recording' in native:
+                status['recording'] = native['recording']
             reason = resource_reason({**status, 'termination': trajectory.get('termination')}, cell)
             if reason:
                 raise ResourceExhausted(reason)
