@@ -1,4 +1,10 @@
 # Overrides on the recorded Python 3.9 / Torch 2.5.1-cu124 / Habitat-Sim 0.3.3 base.
+-r worker-geometry.lock
+torch==2.5.1
+torchvision==0.20.1
+numpy==1.26.4
+opencv-python-headless==4.11.0.86
+sentencepiece==0.2.0
 transformers==4.40.2
 tokenizers==0.19.1
 timm==1.0.15

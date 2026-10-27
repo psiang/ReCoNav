@@ -16,7 +16,7 @@ Install the core package and set `RECONAV_DATA_ROOT` as in the README. Model/sim
 1. Set `RECONAV_EXTERNAL_ROOT`, `RECONAV_MODEL_ROOT` and `RECONAV_HM3D_ROOT` as shown in `.env.example`.
 2. Clone each needed upstream into `$RECONAV_EXTERNAL_ROOT/upstream/<directory>`, check out its recorded `commit`, then run `git submodule update --init --recursive`.
    Apply any recorded `patch` from this checkout. For CA-Nav, run `git -C "$RECONAV_EXTERNAL_ROOT/upstream/GroundingDINO-canav" apply "$PWD/reconav/baselines/patches/groundingdino-canav.patch"`.
-3. Install that upstream's simulator/model dependencies in a separate environment. Keep native Python versions separate from the core Python 3.11 lock.
+3. Use a separate environment for each policy and its simulator/model dependencies. Install `requirements.lock` in the core Python 3.11 environment and the method-specific files below in workers. Launchers put the ReCoNav checkout on each worker's `PYTHONPATH`.
 
 For native simulator methods and image-rendering methods (including NavGPT +ASG), prepare both `<scene>.basis.glb` and the original JPEG-textured `<scene>.glb` for the selected scenes in the benchmark manifest. Obtain the validation `habitat` and `glb` components (`hm3d_val_habitat_v0.2`, `hm3d_val_glb_v0.2`) through the [official HM3D downloader](https://github.com/facebookresearch/habitat-sim/blob/main/src_python/habitat_sim/utils/datasets_download.py). Point `RECONAV_HM3D_ROOT` to their `val/` directory.
 
@@ -47,26 +47,58 @@ Omit `--scene` for all scenes. Outputs go under `$RECONAV_CACHE_ROOT/external/ro
 
 ## Policy environments
 
-| Policy | Habitat-Sim | Worker configuration |
+| Policy | Conda base | Worker configuration |
 |---|---|---|
-| NavGPT / MapGPT | 0.3.3 | `--worker-python /path/to/env/bin/python` |
-| CA-Nav | 0.2.1 | `RECONAV_ENV_CANAV=/path/to/env` |
-| GC-VLN | 0.2.4 | `RECONAV_ENV_GCVLN_RUNTIME_PY39=/path/to/env` |
-| DualVLN | 0.3.3 | `RECONAV_ENV_DUALVLN_OFFICIAL=/path/to/env` |
-| SNav | 0.3.3 | `$RECONAV_EXTERNAL_ROOT/runtime_assets/snav/venv` |
-| Lang2LTL-2 / LIMP +ASG | graph execution | `--worker-python /path/to/formal-env/bin/python` |
+| NavGPT / MapGPT | `environments/habitat033.yml` | `--worker-python /path/to/env/bin/python` |
+| CA-Nav | `environments/canav.yml` | `RECONAV_ENV_CANAV=/path/to/env` |
+| GC-VLN | `environments/gcvln.yml` | `RECONAV_ENV_GCVLN_RUNTIME_PY39=/path/to/env` |
+| DualVLN | `environments/habitat033.yml` | `RECONAV_ENV_DUALVLN_OFFICIAL=/path/to/env` |
+| SNav | `environments/habitat033.yml` | `$RECONAV_EXTERNAL_ROOT/runtime_assets/snav/venv` |
+| Lang2LTL-2 / LIMP +ASG | `environments/formal.yml` | `--worker-python /path/to/formal-env/bin/python` |
 
-For DualVLN, use InternNav's `requirements/habitat_requirements.txt` and `environments/dualvln-overrides.lock`, including `diffusers==0.32.2`. Install FlashAttention 2.7.4.post1 for the same Python, Torch and CUDA ABI as the worker.
+Create each selected method's environment with `conda env create -n reconav-<method> -f <Conda base>`, then activate it before installing its packages below. For SNav, use `--prefix "$RECONAV_EXTERNAL_ROOT/runtime_assets/snav/venv"` instead of `-n`.
 
-Compatibility package pins are under `environments/`. Install the NavGPT overlay with `pip install -r environments/navgpt-compat.lock --target "$RECONAV_EXTERNAL_ROOT/compat/navgpt"`. In GC-VLN's worker, build the pinned PyTorch3D after Torch/CUDA are installed: `pip install --no-deps --no-build-isolation -r environments/gcvln-compat.lock --target "$RECONAV_EXTERNAL_ROOT/compat/gcvln"`. For CPU image rendering, install system `libosmesa6` and `environments/rendering.lock` in the Habitat worker, then set `PYOPENGL_PLATFORM=osmesa`. CA-Nav and GC-VLN also use Xvfb. Formal baselines use Python 3.9, `environments/formal-compat.lock`, the selected upstream dependencies and the **Spot temporal-logic library** (not the unrelated PyPI package `spot`). Only Lang2LTL-2 also needs Torch 2.5.1, Transformers 4.49.0, T5 and its embedding resources. Keep these environments separate from the core lock.
+The worker overlays include `worker-geometry.lock` (Shapely 2.0.7, compatible with Python 3.8/3.9). The core solver retains Shapely 2.1.2.
 
-For CA-Nav and GC-VLN, create and activate `environments/canav.yml` or `environments/gcvln.yml`, then install the matching `.lock` with `pip install --no-deps --no-build-isolation -r environments/<method>.lock`. For CA-Nav, first install `pip==23.0.1 setuptools==65.5.0 wheel==0.38.0 numpy==1.23.4 Cython==0.29.36 meson-python==0.15.0 meson==1.5.2 pyproject-metadata==0.9.1` and set `SETUPTOOLS_USE_DISTUTILS=stdlib` before installing its overlay. Build the upstream native extensions after the overlays are installed.
+For DualVLN, activate its Python 3.9 / Habitat-Sim 0.3.3 environment and install the CUDA toolkit matching Torch. Install Torch before building FlashAttention:
 
-Before GC-VLN's overlay, install its source-build tools: `pip install Cython==0.29.36 meson-python==0.21.1 meson==1.11.2 ninja==1.13.2 pyproject-metadata==0.12.1`.
+```bash
+python -m pip install torch==2.5.1 torchvision==0.20.1 setuptools wheel packaging ninja einops==0.8.1
+python -m pip install --no-build-isolation \
+  -r "$RECONAV_EXTERNAL_ROOT/upstream/InternNav/requirements/habitat_requirements.txt"
+python -m pip install --no-build-isolation -r environments/dualvln-overrides.lock
+```
+
+Compatibility package pins are under `environments/`. In each NavGPT/MapGPT worker, run `pip install -r environments/navgpt-compat.lock -r environments/rendering.lock`. For CPU image rendering, install system `libosmesa6` and set `PYOPENGL_PLATFORM=osmesa`. CA-Nav and GC-VLN also use Xvfb.
+
+In SNav's environment, run `pip install -r environments/snav-overrides.lock`. In each formal-baseline environment, run `pip install -r environments/formal-compat.lock`; `formal.yml` supplies the Spot temporal-logic library. For Lang2LTL-2, also run `pip install torch==2.5.1 transformers==4.49.0 sentencepiece==0.2.0` and prepare T5 and its embedding resources below.
+
+In GC-VLN's worker, build the pinned PyTorch3D after Torch/CUDA are installed: `pip install --no-deps --no-build-isolation -r environments/gcvln-compat.lock --target "$RECONAV_EXTERNAL_ROOT/compat/gcvln"`.
+
+For CA-Nav, create and activate `environments/canav.yml`, then build its Cython dependencies in this order:
+
+```bash
+export SETUPTOOLS_USE_DISTUTILS=stdlib
+python -m pip install -r environments/canav-build.lock
+python -m pip install --no-deps --no-build-isolation cymem==2.0.11 murmurhash==1.0.15
+python -m pip install --no-deps --no-build-isolation preshed==3.0.12 blis==0.7.11
+python -m pip install --no-deps Cython==0.29.36
+python -m pip install --no-deps --no-build-isolation srsly==2.4.8 thinc==8.2.5
+python -m pip install --no-deps --no-build-isolation -r environments/canav.lock
+```
+
+For GC-VLN, create and activate `environments/gcvln.yml`, then run:
+
+```bash
+python -m pip install -r environments/gcvln-build.lock
+python -m pip install --no-deps --no-build-isolation -r environments/gcvln.lock
+```
+
+Build each policy's upstream native extensions after installing its overlay.
 
 For GC-VLN on Torch 2.5.1, install the matching CUDA toolkit, then run `python -m reconav.baselines.gcvln.build_glip` in its worker environment. For CA-Nav, build and install GroundingDINO with `pip install --no-deps --no-build-isolation "$RECONAV_EXTERNAL_ROOT/upstream/GroundingDINO-canav"` in the CA-Nav environment.
 
-CA-Nav uses `gym==0.21.0` and `numpy==1.23.4`. Install Gym with `pip==23.0.1`, `setuptools==65.5.0` and `wheel==0.38.0`: `pip install --no-build-isolation gym==0.21.0`. For GC-VLN's GLIP, run `python -m nltk.downloader punkt punkt_tab averaged_perceptron_tagger averaged_perceptron_tagger_eng` before offline episodes.
+For GC-VLN's GLIP, run `python -m nltk.downloader punkt punkt_tab averaged_perceptron_tagger averaged_perceptron_tagger_eng` before offline episodes.
 
 GC-VLN and CA-Nav also need the `bert-base-uncased` tokenizer and weights in the Hugging Face cache. Set `HF_HOME` to a persistent cache, then prepare the pinned checkpoint and its legacy cache alias before offline runs:
 

@@ -1,0 +1,12 @@
+name: reconav-habitat033
+channels:
+  - aihabitat
+  - conda-forge
+dependencies:
+  - python=3.9.23
+  - habitat-sim=0.3.3
+  - habitat-sim-mutex=1.0=display_nobullet
+  - numpy=1.26.4
+  - scipy=1.13.1
+  - matplotlib=3.7.3
+  - pip

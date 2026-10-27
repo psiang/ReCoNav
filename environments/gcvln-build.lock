@@ -1,0 +1,8 @@
+# Install before gcvln.lock in the Python 3.9 worker.
+setuptools==65.5.0
+wheel==0.38.0
+Cython==0.29.36
+meson-python==0.21.1
+meson==1.11.2
+ninja==1.13.2
+pyproject-metadata==0.12.1

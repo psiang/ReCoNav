@@ -1,0 +1,7 @@
+name: reconav-formal
+channels:
+  - conda-forge
+dependencies:
+  - python=3.9.23
+  - spot=2.14.1
+  - pip
