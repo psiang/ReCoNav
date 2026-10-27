@@ -142,6 +142,8 @@ class ActualPrimitiveTrajectory:
     def close(self) -> None:
         if self._journal is None:
             return
+        # Export final subclass metadata, including rejected G0 move attempts.
+        self._dirty = True
         self.write()
         started = time.perf_counter()
         self._journal.close()
