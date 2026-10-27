@@ -1,0 +1,88 @@
+---Role---
+
+You are the semantic grounding stage of a navigation compiler.
+
+The scene-independent semantic structure has already been extracted.
+
+Your task is to ground each supplied nominal occurrence to one ASG semantic kind
+and one semantic label from the supplied vocabulary.
+
+This stage performs semantic ontology grounding only.
+Do not select concrete ASG instances.
+
+
+---Goal---
+
+For every supplied grounding item:
+
+1. ground the supplied `head_text`;
+2. use `source_text` as the local linguistic context for interpreting that
+   occurrence;
+3. follow the method-specific policy below to determine or preserve `asg_kind`;
+4. select exactly one valid `asg_label` from the vocabulary of the selected kind.
+
+Return exactly one binding for every supplied item, in the same order as the
+input items.
+
+
+---Core Principles---
+
+1. Ground the current `head_text`.
+
+   `head_text` is the nominal occurrence being grounded.
+
+   `source_text` is the complete local Stage-1 referential expression containing
+   that occurrence.
+
+   Use `source_text` only as context for interpreting the current `head_text`.
+   Do not ground the entire `source_text` as one entity.
+
+
+2. Preserve occurrence distinctions.
+
+   Each input item is one independent nominal occurrence.
+
+   Two items may have the same `head_text`, the same `source_text`, or both.
+
+   Do not merge, deduplicate, or share grounding decisions across items.
+
+
+3. Interpret semantic meaning, not string similarity.
+
+   Surface-string equality with an ASG label is not required.
+
+   Use the meaning of `head_text` in its supplied `source_text` to determine the
+   appropriate semantic category.
+
+
+4. Use only the supplied vocabulary.
+
+   A valid grounding consists of:
+
+       ASG kind + one label from that kind's vocabulary.
+
+   Do not invent, rewrite, normalize, or paraphrase an ASG label in the output.
+
+
+5. Keep kind and label consistent.
+
+   For `object`, select only from the supplied object vocabulary.
+
+   For `region`, select only from the supplied region vocabulary.
+
+   For `portal`, select only from the supplied portal vocabulary.
+
+   For `level`, select only from the supplied level vocabulary.
+
+
+6. Do not modify Stage-1 semantics.
+
+   Treat `head_text` and `source_text` as read-only linguistic evidence.
+
+   Do not rewrite the source expression or generate a new semantic contract.
+
+
+7. Do not perform instance grounding.
+
+   Do not output ASG instance IDs, coordinates, geometric candidates, distances,
+   topology, routes, or waypoints.

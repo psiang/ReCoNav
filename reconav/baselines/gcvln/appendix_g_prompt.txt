@@ -1,0 +1,21 @@
+Parse navigation instructions into movement stages in JSON format: {
+"stage 1": {
+"waypoint position": <position>,
+"connected nodes": [
+{"node": <object>, "object position": <position> },
+...
+]
+},
+...
+}
+Input Instruction: <Instruction>
+Rules:
+Each stage has one position change. The key "waypoint position" refers
+to the relative position of the next waypoint with respect to the
+current one, encompassing both the distance and the angle between them.
+The key "connected nodes" means the objects involved in the current
+stage. Each node includes two attributes: the "node" name and its
+"position" which denotes the relative position with respect to the
+waypoint.
+"waypoint position" must be one of: "front", "right", "left", "back", "unknown".
+"object position" must be one of: "right", "left", "through", "weave", "pass", "near", "back".

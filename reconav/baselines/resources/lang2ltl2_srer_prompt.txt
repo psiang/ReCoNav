@@ -1,0 +1,105 @@
+Your task is to extract referring expressions from a natural language command. A referring expression contains entities (landmarks, objects, or other nouns), and spatial relations describing relative locations. Avoid adding temporal relations indicating time sequencing of visits to spatial relations. Create a dictionary that maps each spatial relation to its corresponding entities.
+
+Here are some examples:
+
+Command: "go to the coffee shop called Cafe Pulse"
+Referring Expressions: ["the coffee shop called Cafe Pulse"]
+Entities: ["the coffee shop called Cafe Pulse"]
+Spatial Predicates: []
+Lifted Command: "head to a"
+
+Command: "Walk to the north of Subway"
+Referring Expressions: ["the north of Subway"]
+Entities: ["Subway"]
+Spatial Predicates [{"the north of": ["Subway"]}]
+Lifted Command: "Walk to a"
+
+Command: "go to the bicycle rack in front of the CIT"
+Referring Expressions: ["the bicycle rack in front of the CIT"]
+Entities: ["the bicycle rack", "the CIT"]
+Spatial Predicates: [{"in front of": ["the bicycle rack", "the CIT"]}]
+Lifted Command: "go to a"
+
+Command: "Visit The Kensington, HI Boston, and Dunkin" Donuts in that specific order. Make sure not to visit waypoints out of turn"
+Referring Expressions: ["The Kensington", "HI Boston", "Dunkin" Donuts"]
+Entities: ["The Kensington", "HI Boston", "Dunkin" Donuts"]
+Spatial Predicates: []
+Lifted Command: "Visit a, b, and c in that specific order. Make sure not to visit waypoints out of turn"
+
+Command: "do not go to the bench in front of SciLi until you visit the bicycle rack in front of the CIT"
+Referring Expressions: ["the bench in front of SciLi", "the bicycle rack in front of the CIT"]
+Entities: ["the bench", "SciLi", "the bicycle rack", "the CIT"]
+Spatial Predicates: [{"in front of": ["the bench", "SciLi"]}, {"in front of": ["the bicycle rack, "the CIT"]}]
+Lifted Command: "do not go to a until you visit b"
+
+Command: "Always patrol the restaurant called Taco Bell in front of the bus stop"
+Referring Expressions: ["the restaurant called Taco Bell in front of the bus stop"]
+Entities: ["the restaurant called Taco Bell", "the bus stop"]
+Spatial Predicates: [{"in front of": ["the restaurant called Taco Bell", "the bus stop"]}]
+Lifted Command: "Always patrol a"
+
+Command: "Walk to the Korean restaurant next to Zinnekin"s and CVS Pharmacy but do not go to CVS Pharmacy until you have visited the Korean restaurant next to Zinnekin"s"
+Referring Expressions: ["the Korean restaurant next to Zinnekin"s", "CVS Pharmacy"]
+Entities: ["the Korean restaurant", "Zinnekin"s", "CVS Pharmacy"]
+Spatial Predicates: [{"next to": ["the Korean restaurant", "Zinnekin"s"]}]
+Lifted Command: "Walk to and b but do not go to b until you have visited a"
+
+Command: "the Subway restaurant, the cafe north of Citibank, and the bench in front of Dunkin" should never be visited"
+Referring Expressions: ["the Subway restaurant", "the cafe north of Citibank", "the bench in front of Dunkin""]
+Entities: ["the Subway restaurant", "the cafe", "Citibank", "the bench", "Dunkin""]
+Spatial Predicates: [{"north of": ["the cafe", "Citibank"]}, {"in front of": ["the bench", "Dunkin""]}]
+Lifted Command: "a, b, and c should never be visited"
+
+Command: "Walk to the cafeteria and then you must walk to the bike rack near CIT never return to the previous location you have been to"
+Referring Expressions: ["the cafeteria", "the bike rack near CIT"]
+Entities: ["the cafeteria", "the bike rack", "CIT"]
+Spatial Predicates: [{"near": ["the bike rack", "CIT"]}]
+Lifted Command: "Walk to a and then you must walk to b never return to the previous location you have been to"
+
+Command: "visit the bench south of Walgreens, Walmart, and the Ford car close to Ross in this strict order once the predecessor is visited you must visit the successor"
+Referring Expressions: ["the bench south of Walgreens", "Walmart", "the Ford car close to Ross"]
+Entities: ["the bench", "Walgreens", "Walmart", "the Ford car", "Ross"]
+Spatial Predicates: [{"south of": ["the bench", "Walgreens"]}, {"close to": "the Ford car", "Ross"}]
+Lifted Command: "visit a, b, and c in this strict order once the predecessor is visited you must visit the successor"
+
+Command: "Keep visiting the bicycle rack near the store named CVS Pharmacy and Walgreens forever"
+Referring Expressions: ["the bicycle rack near the store named CVS Pharmacy", "Walgreens"]
+Entities: ["the bicycle rack", "the store named CVS Pharmacy", "Walgreens"]
+Spatial Predicates: [{"near": ["the bicycle rack", "the store named CVS Pharmacy"]}]
+Lifted Command: "Keep visiting a and b forever"
+
+Command: "Visit the car left of the restaurant named Burger King, and sometime afterwards visit the car to the left of the restaurant named Burger King"
+Referring Expressions: ["the car left of the restaurant named Burger King", "the car to the left of the restaurant named Burger King"]
+Entities: ["the car", "the restaurant named Burger King"]
+Spatial Predicates: [{"left of": ["the car", "the restaurant named Burger King"]}, {"to the left of": ["the car", "the restaurant named Burger King"]}]
+Lifted Command: "Visit a, and sometime afterwards visit b"
+
+Command: "you have to go to the bicycle rack on the left of the translation services one or more than one time"
+Referring Expressions: ["the bicycle rack on the left of the translation services"]
+Entities: ["the bicycle rack", "the translation services"]
+Spatial Predicates: [{"on the left of": ["the bicycle rack", "the translation services"]}]
+Lifted Command: "you have to go to a one or more than one time"
+
+Command: "visit Lucy"s League between the clothing store called Best of Boston and the ice cream store three times and then stop visiting it anymore"
+Referring Expressions: ["Lucy"s League between the clothing store called Best of Boston and the ice cream store"]
+Entities: ["Lucy"s League", "the clothing store called Best of Boston", "the ice cream store"]
+Spatial Predicates: [{"between": ["Lucy"s League", "the clothing store called Best of Boston", "the ice cream store"]}]
+Lifted Command: "visit a three times and then stop visiting it anymore"
+
+Command: "you cannot go to other place from the park bench by the gift shop unless you see the vendor cart between the Best of Boston clothing store and Boston Pewter Company"
+Referring Expressions: ["the park bench by the gift shop", "the vendor cart between the Best of Boston clothing store and Boston Pewter Company"]
+Entities: ["the park bench", "the gift shop", "the vendor cart", "the Best of Boston clothing store", "Boston Pewter Company"]
+Spatial Predicates: [{"by": ["the park bench", "the gift shop"]}, {"between": ["the vendor cart", "the Best of Boston clothing store", "Boston Pewter Company"]}]
+Lifted Command: "you cannot go to other place from a unless you see b"
+
+Command: "move the ATM to the right of TD Bank then find Starbucks behind the restaurant"
+Referring Expressions: ["the ATM to the right of TD Bank", "Starbucks behind the restaurant"]
+Entities: ["the ATM", "TD Bank", "Starbucks", "the restaurant"]
+Spatial Predicates: [{"to the right of": ["the ATM", "TD Bank"]}, {"behind": ["Starbucks", "the restaurant"]}]
+Lifted Command: "move a then find b"
+
+Command: "visit the street vendor cart in front of the coffee shop called Cafe Pulse exactly once avoid the car at the shop called Boston Pewter Company or the bike rack before the street vendor cart in front of the coffee shop called Cafe Pulse then reach the car at the shop called Boston Pewter Company exactly once avoid the bike rack before the car at the shop called Boston Pewter Company finally move to the bike rack"
+Referring Expressions: ["the street vendor cart in front of the coffee shop called Cafe Pulse", "the car at the shop called Boston Pewter Company", "the bike rack"]
+Entities: ["the street vendor cart", "the coffee shop called Cafe Pulse", "the car", "the shop called Boston Pewter Company", "the bike rack"]
+Spatial Predicates: [{"in front of": ["the street vendor cart", "the coffee shop called Cafe Pulse"]}, {"at": ["the car", "the shop called Boston Pewter Company"]}]
+Lifted Command: "visit a exactly once avoid b or c before a then reach b exactly once avoid c before b finally move to c"

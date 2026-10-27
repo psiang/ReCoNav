@@ -1,0 +1,27 @@
+{
+  "habitat_versions": [
+    "0.2.1",
+    "0.2.4",
+    "0.3.3"
+  ],
+  "robot_radius_m": 0.25,
+  "robot_height_m": 1.5,
+  "supported_starts": 178,
+  "requires_official_scene_meshes": true,
+  "release_url": "https://github.com/psiang/ReCoNav/releases/download/v1.0.0/habitat-navigation-v1.0.0.tar.gz",
+  "environment_variable": "RECONAV_HABITAT_NAVIGATION_ROOT",
+  "downloaded_directory": "external/resources/habitat-navigation",
+  "files": 33,
+  "scene_ids": [
+    "00824-Dd4bFSTQ8gi",
+    "00829-QaLdnwvtxbs",
+    "00843-DYehNKdT76V",
+    "00848-ziup5kvtCCR",
+    "00849-a8BtkwhxdRV",
+    "00853-5cdEh9F2hJL",
+    "00861-GLAQ4DNUx5U",
+    "00873-bxsVRursffK",
+    "00891-cvZr5TUy5C5"
+  ],
+  "data_terms": "habitat_navigation_DATA_TERMS.md"
+}

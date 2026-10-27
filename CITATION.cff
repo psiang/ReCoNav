@@ -1,0 +1,38 @@
+cff-version: 1.2.0
+message: "If you use ReCoNav or its benchmark, please cite the work below."
+type: software
+title: ReCoNav
+authors:
+  - family-names: Peng
+    given-names: Sixiang
+  - family-names: Yu
+    given-names: Zehuan
+  - family-names: Liu
+    given-names: Wenyi
+  - family-names: Xie
+    given-names: Zhensheng
+  - family-names: Zhang
+    given-names: Charles
+  - family-names: Jiang
+    given-names: Chenhan
+url: "https://github.com/psiang/ReCoNav"
+repository-code: "https://github.com/psiang/ReCoNav"
+license: Apache-2.0
+preferred-citation:
+  type: generic
+  title: "ReCoNav: Reliable Constrained Long-Horizon Vision-and-Language Navigation via a Determination Engine"
+  authors:
+    - family-names: Peng
+      given-names: Sixiang
+    - family-names: Yu
+      given-names: Zehuan
+    - family-names: Liu
+      given-names: Wenyi
+    - family-names: Xie
+      given-names: Zhensheng
+    - family-names: Zhang
+      given-names: Charles
+    - family-names: Jiang
+      given-names: Chenhan
+  year: 2026
+  url: "https://github.com/psiang/ReCoNav"

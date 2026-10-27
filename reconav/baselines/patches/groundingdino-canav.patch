@@ -1,0 +1,27 @@
+diff --git a/groundingdino/util/inference.py b/groundingdino/util/inference.py
+index 66461bc..b24b735 100644
+--- a/groundingdino/util/inference.py
++++ b/groundingdino/util/inference.py
+@@ -2,6 +2,7 @@ from typing import Tuple, List
+ 
+ import cv2
+ import numpy as np
++from nltk.metrics import edit_distance
+ import supervision as sv
+ import torch
+ from PIL import Image
+@@ -235,8 +236,11 @@ class Model:
+     def phrases2classes(phrases: List[str], classes: List[str]) -> np.ndarray:
+         class_ids = []
+         for phrase in phrases:
+-            try:
++            if phrase in classes:
+                 class_ids.append(classes.index(phrase))
+-            except ValueError:
+-                class_ids.append(None)
++            else:
++                distances = np.array(
++                    [edit_distance(phrase, class_name) for class_name in classes]
++                )
++                class_ids.append(int(np.argmin(distances)))
+         return np.array(class_ids)

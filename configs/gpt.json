@@ -1,0 +1,46 @@
+{
+  "runtime_version": "paper-main-v33-paper-method-names",
+  "provider": "openai",
+  "backbone": "openai",
+  "config": {
+    "max_tokens": 8192,
+    "temperature": 0.7,
+    "top_p": 0.8,
+    "top_k": 20,
+    "min_p": 0.0,
+    "presence_penalty": 0.0,
+    "repetition_penalty": 1.0,
+    "seed": 0,
+    "enable_thinking": false,
+    "max_input_characters": 512000,
+    "solver_seconds": 90.0,
+    "resolution_seconds": 360.0,
+    "max_assignments": 128,
+    "repair_rounds": 2,
+    "feedback_rounds": 2,
+    "scene_geometry": "compact",
+    "tokenizer_name_or_path": null,
+    "served_max_model_len": null,
+    "context_safety_margin": 4096
+  },
+  "methods": [
+    "GPT-Direct",
+    "GPT-Direct-Feedback",
+    "GPT-Direct-ID-Sequence",
+    "GPT-No-Verify-Repair",
+    "GPT-Forced-Early",
+    "GPT-ReCoNav"
+  ],
+  "task_data_source": "hm3dsem",
+  "asg_data_source": "hm3dsem",
+  "reference_seconds": 90.0,
+  "task_order": "mechanism-first",
+  "model": {
+    "served_model": "gpt-5.6-sol",
+    "provider": "openai",
+    "api": "responses",
+    "reasoning_effort": "high"
+  },
+  "task_workers": 1,
+  "method_workers": 1
+}

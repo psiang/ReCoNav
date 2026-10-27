@@ -1,0 +1,23 @@
+---Method Policy: ReCoNav---
+
+Deterministic grounding has already been applied before this LLM call.
+
+Only unresolved items are supplied to you.
+
+For each item:
+
+1. If `asg_kind` is non-null, it has been mechanically determined and is
+   authoritative.
+
+   Preserve it exactly.
+   Do not reconsider or override it.
+
+2. If `asg_kind` is null, determine whether the current `head_text` denotes an
+   `object`, `region`, `portal`, or `level`, using its `source_text` and the fixed
+   grounding semantics below.
+
+3. In either case, select exactly one valid `asg_label` from the vocabulary of
+   the selected kind.
+
+Do not infer why an item was or was not resolved before this call.
+Ground only the items that are supplied.

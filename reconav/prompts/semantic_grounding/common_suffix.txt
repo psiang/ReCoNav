@@ -1,0 +1,174 @@
+---Steps---
+
+1. Read the supplied ASG vocabulary.
+
+2. Process the input items independently and in their given order.
+
+3. For each item:
+   a. read the current `head_text`;
+   b. read its `source_text` as local linguistic context;
+   c. apply the method-specific policy to determine or preserve `asg_kind`;
+   d. inspect only the vocabulary corresponding to that kind;
+   e. select exactly one semantic label for the current `head_text`.
+
+4. Verify that every selected `asg_label` occurs exactly in the supplied
+   vocabulary for the returned `asg_kind`.
+
+5. Return exactly one binding for every supplied item, preserving input order.
+
+
+==========================================================
+Knowledge Base (Fixed Grounding Semantics)
+==========================================================
+
+I. ASG Kinds
+==========================================================
+
+The supported ASG kinds are:
+
+- `object`
+- `region`
+- `portal`
+- `level`
+
+`object` represents a physical object or object category.
+
+`region` represents a navigable or spatial region such as a room or area.
+
+`portal` represents a passage or connection through which navigation may pass,
+such as a door or opening.
+
+`level` represents a floor or level containing spatial regions.
+
+
+==========================================================
+II. Spatial Qualification
+==========================================================
+
+Use the semantic relation expressed by `source_text` when it determines the
+kind of the current `head_text`.
+
+The fixed type semantics are:
+
+IN
+
+    object -> region
+    object -> level
+    region -> level
+    portal -> region (incident to / connected to that region)
+
+
+NEAR
+
+    qualified nominal -> object
+    nominal reference -> object
+
+
+NEAREST_TO
+
+    qualified nominal -> object
+    nominal reference -> object
+
+
+FARTHEST_FROM
+
+    qualified nominal -> object
+    nominal reference -> object
+
+
+BETWEEN
+
+    qualified nominal -> portal
+    nominal references -> region
+
+
+An explicit navigation START reference is not an ASG grounding item.
+
+Interpret the semantic relation expressed by the language.
+Do not rely on a particular surface keyword.
+
+
+==========================================================
+III. ASG Vocabulary
+==========================================================
+
+The input provides a kind-separated vocabulary:
+
+    asg_vocabulary.object
+    asg_vocabulary.region
+    asg_vocabulary.portal
+    asg_vocabulary.level
+
+Every returned `asg_label` must be copied exactly from the vocabulary
+corresponding to the returned `asg_kind`.
+
+The vocabulary contains semantic ontology labels, not concrete scene instances.
+
+
+==========================================================
+IV. Kind Wildcards
+==========================================================
+
+`any` is a reserved label in each kind's supplied vocabulary. It represents all
+instances of that kind, without restriction to a category or named instance.
+Generic objects use object/any; areas, spaces or regions use region/any;
+building floors, levels, storeys or stories use level/any.
+The collective label region/room excludes hallway, staircase, garage, balcony
+and porch categories. The collective label portal/portal includes door, opening
+and untyped connections, excluding stairs. Use these labels for generic rooms
+and ordinary portals; portal/any explicitly denotes all portals including stairs.
+Object/floor denotes physical floor surfaces, not building storeys. Interpret
+the local context when a word has both a category and a generic-kind reading.
+A determiner such as "any" does not by itself imply a wildcard. Preserve a
+specific category or named level whenever the nominal supplies one.
+
+
+==========================================================
+V. Semantic vs. Instance Grounding
+==========================================================
+
+This stage performs:
+
+    nominal occurrence
+        ->
+    ASG kind + semantic label
+
+Concrete ASG instance resolution is performed later.
+
+
+==========================================================
+Output
+==========================================================
+
+Return valid JSON only.
+
+Return exactly one binding for every supplied item, in exactly the same order as
+the input items.
+
+Each binding must contain exactly:
+
+{
+  "head_text": "<exact input head_text>",
+  "asg_kind": "<object | region | portal | level>",
+  "asg_label": "<exact label from the corresponding supplied vocabulary>"
+}
+
+Requirements:
+
+- Copy `head_text` exactly from the corresponding input item.
+- Do not reorder bindings.
+- Do not merge repeated occurrences.
+- `asg_kind` must be one of `object`, `region`, `portal`, or `level`.
+- `asg_label` must occur exactly in the vocabulary corresponding to `asg_kind`.
+- Do not add any fields.
+
+
+---Notes---
+
+1. Output JSON only.
+2. Do not output Markdown, explanations, comments, or additional text.
+3. Process every supplied item independently.
+4. Preserve input order.
+5. Do not invent ASG labels.
+6. Do not output concrete ASG instance IDs.
+7. Return exactly one binding for every supplied item.

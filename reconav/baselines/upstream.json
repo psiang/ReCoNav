@@ -1,0 +1,100 @@
+[
+  {
+    "directory": "NavGPT",
+    "repository": "https://github.com/GengzeZhou/NavGPT.git",
+    "commit": "b3fc8a21b8a1f66b09dde833bcfc25767ef1962d",
+    "patch": null,
+    "licenses": [
+      "reconav/baselines/licenses/NavGPT/LICENSE"
+    ]
+  },
+  {
+    "directory": "MapGPT",
+    "repository": "https://github.com/chen-judge/MapGPT.git",
+    "commit": "7c642f4507a8dde6703e2c61c8fd8ff3bc4bd322",
+    "patch": null,
+    "licenses": []
+  },
+  {
+    "directory": "CA-Nav-code",
+    "repository": "https://github.com/Chenkehan21/CA-Nav-code.git",
+    "commit": "8430359ff930880ccc74131d4c31d74a598a9b6e",
+    "patch": null,
+    "licenses": []
+  },
+  {
+    "directory": "GC-VLN",
+    "repository": "https://github.com/bagh2178/GC-VLN.git",
+    "commit": "1beddca8d90d79855c110c5a433f7b8856ca263a",
+    "patch": null,
+    "licenses": [
+      "reconav/baselines/licenses/GC-VLN/LICENSE"
+    ]
+  },
+  {
+    "directory": "NavSpace",
+    "repository": "https://github.com/TidalHarley/NavSpace.git",
+    "commit": "976bc48df4875139c96f257d8ec63272a50ad219",
+    "patch": null,
+    "licenses": []
+  },
+  {
+    "directory": "InternNav",
+    "repository": "https://github.com/InternRobotics/InternNav.git",
+    "commit": "7a5c62400ac45b313d9b709c740b64191556a242",
+    "patch": null,
+    "licenses": [
+      "reconav/baselines/licenses/InternNav/LICENSE"
+    ]
+  },
+  {
+    "directory": "Lang2LTL-2",
+    "repository": "https://github.com/h2r/Lang2LTL-2.git",
+    "commit": "78fd74756856fa9dc0990c23cb85d6bc4d59a4fe",
+    "patch": null,
+    "licenses": []
+  },
+  {
+    "directory": "robotlimp",
+    "repository": "https://github.com/benedictquartey/robotlimp.git",
+    "commit": "28d2e5b260ff52de7c7ae6a108284d5dfa5b4d28",
+    "patch": null,
+    "licenses": [
+      "reconav/baselines/licenses/robotlimp/LICENSE"
+    ]
+  },
+  {
+    "directory": "habitat-lab-canav",
+    "repository": "https://github.com/facebookresearch/habitat-lab.git",
+    "commit": "d6ed1c0a0e786f16f261de2beafe347f4186d0d8",
+    "patch": null,
+    "licenses": [
+      "reconav/baselines/licenses/habitat-lab-canav/LICENSE"
+    ],
+    "role": "CA-Nav dependency"
+  },
+  {
+    "directory": "GroundingDINO-canav",
+    "repository": "https://github.com/IDEA-Research/GroundingDINO.git",
+    "commit": "57535c5a79791cb76e36fdb64975271354f10251",
+    "patch": "reconav/baselines/patches/groundingdino-canav.patch",
+    "licenses": [
+      "reconav/baselines/licenses/GroundingDINO-canav/LICENSE"
+    ],
+    "role": "CA-Nav dependency",
+    "patched_files": {
+      "groundingdino/util/inference.py": "7a9767d741183651e5b0eda4fc2e8719d7955b8bd3479871dfa8724e143cf3c6"
+    },
+    "patch_role": "Original CA-Nav experiment adaptation: map unmatched detector phrases to the nearest declared class by edit distance."
+  },
+  {
+    "directory": "segment-anything-canav",
+    "repository": "https://github.com/facebookresearch/segment-anything.git",
+    "commit": "dca509fe793f601edb92606367a655c15ac00fdf",
+    "patch": null,
+    "licenses": [
+      "reconav/baselines/licenses/segment-anything-canav/LICENSE"
+    ],
+    "role": "CA-Nav dependency"
+  }
+]

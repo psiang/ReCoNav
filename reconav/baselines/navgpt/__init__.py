@@ -1,0 +1,1 @@
+"""navgpt baseline adapter."""

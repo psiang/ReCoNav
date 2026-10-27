@@ -1,0 +1,48 @@
+{
+  "runtime_version": "paper-main-v33-paper-method-names",
+  "provider": "qwen",
+  "backbone": "gemma",
+  "config": {
+    "max_tokens": 8192,
+    "temperature": 0.7,
+    "top_p": 0.8,
+    "top_k": 20,
+    "min_p": 0.0,
+    "presence_penalty": 0.0,
+    "repetition_penalty": 1.0,
+    "seed": 0,
+    "enable_thinking": false,
+    "max_input_characters": 512000,
+    "solver_seconds": 90.0,
+    "resolution_seconds": 360.0,
+    "max_assignments": 128,
+    "repair_rounds": 2,
+    "feedback_rounds": 2,
+    "scene_geometry": "compact",
+    "tokenizer_name_or_path": null,
+    "served_max_model_len": 131072,
+    "context_safety_margin": 4096
+  },
+  "methods": [
+    "Gemma-Direct",
+    "Gemma-Direct-Feedback",
+    "Gemma-Direct-ID-Sequence",
+    "Gemma-No-Verify-Repair",
+    "Gemma-Forced-Early",
+    "Gemma-ReCoNav"
+  ],
+  "task_data_source": "hm3dsem",
+  "asg_data_source": "hm3dsem",
+  "reference_seconds": 90.0,
+  "task_order": "mechanism-first",
+  "model": {
+    "served_model": "gemma4-31b",
+    "provider": "qwen",
+    "api": null,
+    "reasoning_effort": null,
+    "checkpoint_revision": "842da3794eaa0b77d5f08bae87a17459d91ff475",
+    "checkpoint_repository": "google/gemma-4-31B-it"
+  },
+  "task_workers": 1,
+  "method_workers": 1
+}

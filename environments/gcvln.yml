@@ -1,0 +1,13 @@
+name: reconav-gcvln
+channels:
+  - aihabitat
+  - conda-forge
+dependencies:
+  - python=3.9.23
+  - habitat-sim=0.2.4
+  - habitat-sim-mutex=1.0=display_nobullet
+  - numpy=1.26.4
+  - scipy=1.13.1
+  - matplotlib=3.3.2
+  - pillow=9.5.0
+  - pip=25.2

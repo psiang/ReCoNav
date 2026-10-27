@@ -1,0 +1,1 @@
+"""mapgpt baseline adapter."""

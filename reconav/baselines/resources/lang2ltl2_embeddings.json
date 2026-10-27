@@ -1,0 +1,12 @@
+{
+  "model": "text-embedding-3-large",
+  "dimensions": 3072,
+  "vectors": 5280,
+  "format": "zip of lossless original JSON vectors",
+  "contents": "Scene landmark descriptions and instruction-derived referring expressions",
+  "usage": "Automatically reused by Lang2LTL-2; new uncached texts require the original embedding API.",
+  "release_url": "https://github.com/psiang/ReCoNav/releases/download/v1.0.0/lang2ltl2-embeddings-v1.0.0.zip",
+  "downloaded_path": "external/resources/lang2ltl2/embeddings.zip",
+  "environment_variable": "RECONAV_LANG2LTL_EMBEDDINGS",
+  "data_terms": "lang2ltl2_embeddings_DATA_TERMS.md"
+}

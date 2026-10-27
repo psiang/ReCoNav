@@ -1,0 +1,1172 @@
+{
+  "policy_name": "benchmark_step1_manual_semantic_policy",
+  "source": {
+    "filename": "hm3dsem_category_mappings(1).tsv",
+    "rows": 2367,
+    "canonical_categories": 1623,
+    "columns": [
+      "raw_category",
+      "category",
+      "mpcat40"
+    ]
+  },
+  "interpretation": "The TSV supplies labels/mappings, not word-sense equivalence. The deny sets and directional denotations below are explicit manual benchmark policy, not inferred TSV ground truth.",
+  "object_proposal_blacklist": {
+    "invalid_or_nonreferential": [
+      "clutter",
+      "junk",
+      "object",
+      "objects",
+      "partial",
+      "unknown"
+    ],
+    "building_structure": [
+      "aisle frame",
+      "arch",
+      "archway",
+      "attic door",
+      "attic entrance",
+      "attic hatch",
+      "balcony",
+      "balcony railing",
+      "balustrade",
+      "banister",
+      "baseboard",
+      "bath door",
+      "bath door frame",
+      "bath floor",
+      "bath wall",
+      "bathroom floor",
+      "bathroom wall",
+      "bathroom window",
+      "bathtub platform",
+      "beam",
+      "bottom of stairs",
+      "ceiling floor",
+      "closet door",
+      "closet floor",
+      "column",
+      "compound wall",
+      "cornice",
+      "decorative window",
+      "dirt ground",
+      "door",
+      "door /otherroom",
+      "door frame",
+      "door screen",
+      "door window",
+      "door/window",
+      "door/window frame",
+      "doorpost",
+      "doorstep",
+      "doorway",
+      "drywall board",
+      "elevator",
+      "elevator door",
+      "entrance arch",
+      "exhibition window",
+      "exhibition window frame",
+      "fence",
+      "fireplace floor",
+      "fireplace wall",
+      "floor",
+      "floor /otherroom",
+      "floor /outside",
+      "floor frame",
+      "garage door",
+      "garage door frame",
+      "gate",
+      "glass door",
+      "grass",
+      "gravel",
+      "handrail",
+      "kitchen wall",
+      "landing",
+      "lawn",
+      "molding",
+      "niche",
+      "office wall",
+      "paneling",
+      "parapet",
+      "partition",
+      "patio floor",
+      "pavement",
+      "pillar",
+      "post",
+      "rafter",
+      "rail",
+      "railing",
+      "recessed wall",
+      "relief",
+      "riser",
+      "shower base",
+      "shower ceiling",
+      "shower door",
+      "shower door frame",
+      "shower floor",
+      "shower frame",
+      "shower glass",
+      "shower handrail",
+      "shower step",
+      "shower tray",
+      "shower wall",
+      "shower wall cubby",
+      "shower window frame",
+      "skirting board",
+      "skylight",
+      "sliding door",
+      "sliding glass door",
+      "solarium door",
+      "stained glass",
+      "stair",
+      "stair frame",
+      "stair handle",
+      "stair step",
+      "stair wall",
+      "staircase",
+      "staircase handrail",
+      "staircase trim",
+      "staircase wall",
+      "stairs",
+      "stairs railing",
+      "stairs skirt",
+      "stairs trim",
+      "stairs wall",
+      "stairwell",
+      "step",
+      "support beam",
+      "wall",
+      "wall /outside",
+      "wall outside",
+      "wall panel",
+      "wall panel frame",
+      "window",
+      "window /otherroom",
+      "window /outside",
+      "window frame",
+      "window frame /otherroom",
+      "window glass",
+      "window/door"
+    ],
+    "explicit_overhead": [
+      "bedroom ceiling",
+      "ceiling",
+      "ceiling arch",
+      "ceiling bedroom",
+      "ceiling boarder",
+      "ceiling border",
+      "ceiling chassis",
+      "ceiling corridor",
+      "ceiling decorative lamp",
+      "ceiling dome",
+      "ceiling door",
+      "ceiling duct",
+      "ceiling fan",
+      "ceiling fan lamp",
+      "ceiling fan vent",
+      "ceiling fire detector",
+      "ceiling fixture",
+      "ceiling hanger",
+      "ceiling ladder",
+      "ceiling lamp",
+      "ceiling lamp hanger",
+      "ceiling lamp rail",
+      "ceiling light",
+      "ceiling light fixture connection",
+      "ceiling lower",
+      "ceiling molding",
+      "ceiling panel",
+      "ceiling pipe",
+      "ceiling support",
+      "ceiling under staircase",
+      "ceiling under stairs",
+      "ceiling vent",
+      "ceiling wall",
+      "ceiling window",
+      "ceiling/west wall",
+      "chandelier",
+      "kitchen ceiling",
+      "roof",
+      "shower ceiling lamp"
+    ],
+    "wall_mounted_or_fixed_services": [
+      "air duct",
+      "air vent",
+      "air vent installation",
+      "bath curtain bar",
+      "blinds",
+      "cooker hood",
+      "curtain bar",
+      "curtain box",
+      "curtain hanger",
+      "curtain rail",
+      "curtain rod",
+      "curtain rod cover",
+      "curtain valence",
+      "door handle",
+      "door hinge",
+      "door knob",
+      "doorbell",
+      "duct",
+      "electric outlet",
+      "electrical switchboard",
+      "entry phone",
+      "exhaust pipe",
+      "extractor hood",
+      "fan air vent",
+      "fire alarm",
+      "fire detector",
+      "fire sprinkler",
+      "fireplace sconce",
+      "floor vent",
+      "fuse box",
+      "fuse panel",
+      "garage door motor",
+      "garage door opener",
+      "garage door opener bar",
+      "garage door opener motor",
+      "garage door opener railing",
+      "garage door railing",
+      "kitchen extractor",
+      "light switch",
+      "motion detector",
+      "outlet",
+      "oven vent",
+      "power breaker box",
+      "range hood",
+      "sconce",
+      "security camera",
+      "security detector",
+      "self-closing mechanism",
+      "shade rail",
+      "shades",
+      "shower curtain bar",
+      "shower curtain rod",
+      "shower rod",
+      "shutter",
+      "shutters",
+      "smoke alarm",
+      "smoke detector",
+      "socket",
+      "sprinkler",
+      "thermostat",
+      "vent",
+      "ventilation",
+      "ventilation hood",
+      "wall beam",
+      "wall board",
+      "wall cabinet",
+      "wall clock",
+      "wall control",
+      "wall cubby",
+      "wall detail",
+      "wall electronics",
+      "wall hanger",
+      "wall hanging decoration",
+      "wall indent",
+      "wall lamp",
+      "wall post",
+      "wall shelf",
+      "wall sign",
+      "wall soap shelf",
+      "wall statue",
+      "wall toilet paper",
+      "wall top",
+      "wall tv",
+      "window shade",
+      "window shutter",
+      "window shutters",
+      "window valence"
+    ],
+    "mirror_proposal_excluded": [
+      "cabinet mirror",
+      "closet mirror wall",
+      "fireplace mirror",
+      "mirror",
+      "mirror /otherroom",
+      "mirror door",
+      "mirror frame",
+      "shower mirror"
+    ],
+    "wall_display_decor": [
+      "art frame",
+      "artwork frame",
+      "display of pictures",
+      "exhibition picture",
+      "painting",
+      "painting /otherroom",
+      "painting frame",
+      "photo",
+      "photos",
+      "picture",
+      "picture frame",
+      "pictures",
+      "portrait",
+      "poster",
+      "set of pictures",
+      "tapestry"
+    ]
+  },
+  "reserved_non_tsv_labels": [
+    "unassigned geometry"
+  ],
+  "generic_head_rules": {
+    "artwork": {
+      "mpcat40": [
+        "picture"
+      ],
+      "add": [
+        "art piece",
+        "art/statue",
+        "bust",
+        "drawing",
+        "figure",
+        "figurine",
+        "painting",
+        "painting /otherroom",
+        "sculpture",
+        "statue"
+      ],
+      "remove": [
+        "picture frame"
+      ]
+    },
+    "basin": {
+      "mpcat40": [
+        "sink"
+      ],
+      "add": [
+        "bath sink",
+        "water basin"
+      ],
+      "remove": []
+    },
+    "bath": {
+      "mpcat40": [
+        "bathtub"
+      ],
+      "add": [
+        "jacuzzi"
+      ],
+      "remove": []
+    },
+    "bath tub": {
+      "mpcat40": [
+        "bathtub"
+      ],
+      "add": [
+        "jacuzzi"
+      ],
+      "remove": []
+    },
+    "bathtub": {
+      "mpcat40": [
+        "bathtub"
+      ],
+      "add": [
+        "jacuzzi"
+      ],
+      "remove": []
+    },
+    "bed": {
+      "mpcat40": [
+        "bed"
+      ],
+      "add": [
+        "bed small",
+        "crib",
+        "sunbed"
+      ],
+      "remove": [
+        "bed base",
+        "bed sheet",
+        "bedframe",
+        "bedpost",
+        "cat bed",
+        "dog bed",
+        "headboard"
+      ]
+    },
+    "bench": {
+      "mpcat40": [],
+      "add": [
+        "bench",
+        "chest bench",
+        "garden bench",
+        "piano bench",
+        "sauna seat",
+        "shower bench",
+        "sitting bench",
+        "spa bench",
+        "stone bench",
+        "weight bench",
+        "window seat"
+      ],
+      "remove": []
+    },
+    "bookshelf": {
+      "mpcat40": [],
+      "add": [
+        "book cabinet",
+        "book rack",
+        "bookshelf",
+        "bookstand"
+      ],
+      "remove": []
+    },
+    "cabinet": {
+      "mpcat40": [
+        "cabinet"
+      ],
+      "add": [
+        "bed cabinet",
+        "bedside cabinet",
+        "cabinet /w cluttered art",
+        "storage unit",
+        "wardrobe"
+      ],
+      "remove": [
+        "cabinet drawer",
+        "cabinet mirror",
+        "cabinet parts",
+        "desk door",
+        "kitchen cabinet door",
+        "kitchen cabinet drawer",
+        "speaker stand"
+      ]
+    },
+    "chair": {
+      "mpcat40": [
+        "chair",
+        "stool"
+      ],
+      "add": [
+        "baby chair",
+        "baby seat",
+        "row of theater chairs",
+        "set of armchairs"
+      ],
+      "remove": [
+        "footrest"
+      ]
+    },
+    "couch": {
+      "mpcat40": [
+        "sofa"
+      ],
+      "add": [
+        "sofa seat"
+      ],
+      "remove": []
+    },
+    "counter": {
+      "mpcat40": [
+        "counter"
+      ],
+      "add": [
+        "cabinet counter",
+        "counter desk",
+        "worktop"
+      ],
+      "remove": [
+        "surface"
+      ]
+    },
+    "countertop": {
+      "mpcat40": [
+        "counter"
+      ],
+      "add": [
+        "cabinet counter",
+        "counter desk",
+        "worktop"
+      ],
+      "remove": [
+        "surface"
+      ]
+    },
+    "cushion": {
+      "mpcat40": [
+        "cushion"
+      ],
+      "add": [
+        "round cushion"
+      ],
+      "remove": []
+    },
+    "desk": {
+      "mpcat40": [],
+      "add": [
+        "computer desk",
+        "counter desk",
+        "desk",
+        "office table",
+        "secretary"
+      ],
+      "remove": []
+    },
+    "flower": {
+      "mpcat40": [],
+      "add": [
+        "bouquet",
+        "dried flowers",
+        "flower",
+        "flowers"
+      ],
+      "remove": []
+    },
+    "flowers": {
+      "mpcat40": [],
+      "add": [
+        "bouquet",
+        "dried flowers",
+        "flower",
+        "flowers"
+      ],
+      "remove": []
+    },
+    "lamp": {
+      "mpcat40": [
+        "lighting"
+      ],
+      "add": [
+        "bed light",
+        "decorative lamp",
+        "decorative lantern",
+        "fluorescent light",
+        "garage light",
+        "lighting fixture"
+      ],
+      "remove": [
+        "ceiling lamp hanger",
+        "ceiling lamp rail",
+        "lamp shade",
+        "lampshade"
+      ]
+    },
+    "light": {
+      "mpcat40": [
+        "lighting"
+      ],
+      "add": [
+        "bed light",
+        "decorative lamp",
+        "decorative lantern",
+        "fluorescent light",
+        "garage light",
+        "lighting fixture"
+      ],
+      "remove": [
+        "ceiling lamp hanger",
+        "ceiling lamp rail",
+        "lamp shade",
+        "lampshade"
+      ]
+    },
+    "light fixture": {
+      "mpcat40": [
+        "lighting"
+      ],
+      "add": [
+        "bed light",
+        "decorative lamp",
+        "decorative lantern",
+        "fluorescent light",
+        "garage light",
+        "lighting fixture"
+      ],
+      "remove": [
+        "ceiling lamp hanger",
+        "ceiling lamp rail",
+        "lamp shade",
+        "lampshade"
+      ]
+    },
+    "lighting fixture": {
+      "mpcat40": [
+        "lighting"
+      ],
+      "add": [
+        "bed light",
+        "decorative lamp",
+        "decorative lantern",
+        "fluorescent light",
+        "garage light",
+        "lighting fixture"
+      ],
+      "remove": [
+        "ceiling lamp hanger",
+        "ceiling lamp rail",
+        "lamp shade",
+        "lampshade"
+      ]
+    },
+    "mirror": {
+      "mpcat40": [
+        "mirror"
+      ],
+      "add": [
+        "cabinet mirror",
+        "closet mirror wall",
+        "fireplace mirror",
+        "mirror door"
+      ],
+      "remove": [
+        "mirror frame"
+      ]
+    },
+    "paper towel": {
+      "mpcat40": [],
+      "add": [
+        "paper towel",
+        "paper towels"
+      ],
+      "remove": []
+    },
+    "paper towels": {
+      "mpcat40": [],
+      "add": [
+        "paper towel",
+        "paper towels"
+      ],
+      "remove": []
+    },
+    "photo": {
+      "mpcat40": [],
+      "add": [
+        "photo",
+        "photos"
+      ],
+      "remove": []
+    },
+    "photos": {
+      "mpcat40": [],
+      "add": [
+        "photo",
+        "photos"
+      ],
+      "remove": []
+    },
+    "picture": {
+      "mpcat40": [
+        "picture"
+      ],
+      "add": [
+        "drawing",
+        "painting",
+        "painting /otherroom"
+      ],
+      "remove": [
+        "picture frame"
+      ]
+    },
+    "pillow": {
+      "mpcat40": [
+        "cushion"
+      ],
+      "add": [
+        "round cushion"
+      ],
+      "remove": []
+    },
+    "plant": {
+      "mpcat40": [
+        "plant"
+      ],
+      "add": [
+        "bonsai tree",
+        "bouquet",
+        "christmas tree",
+        "dried flowers"
+      ],
+      "remove": [
+        "grass"
+      ]
+    },
+    "rack": {
+      "mpcat40": [
+        "shelving"
+      ],
+      "add": [
+        "book rack",
+        "clothes rack",
+        "clothing stand",
+        "coat rack",
+        "dish rack",
+        "magazine rack",
+        "rack of weights",
+        "tool rack",
+        "wine rack"
+      ],
+      "remove": [
+        "easel",
+        "shelf clutter",
+        "shoes on shelf",
+        "tripod",
+        "wine storage"
+      ]
+    },
+    "seat": {
+      "mpcat40": [
+        "chair",
+        "stool",
+        "sofa",
+        "seating"
+      ],
+      "add": [
+        "baby chair",
+        "baby seat",
+        "chest bench",
+        "child car seat",
+        "row of theater chairs",
+        "set of armchairs",
+        "shower seat",
+        "sofa seat",
+        "weight bench"
+      ],
+      "remove": [
+        "footrest"
+      ]
+    },
+    "shelf": {
+      "mpcat40": [
+        "shelving"
+      ],
+      "add": [
+        "book rack",
+        "closet shelving",
+        "fireplace shelf",
+        "high shelf",
+        "shelf / cabinet",
+        "shelf cubby",
+        "shower soap shelf",
+        "soap dispenser shelf in shower",
+        "wall soap shelf"
+      ],
+      "remove": [
+        "easel",
+        "shelf clutter",
+        "shoes on shelf",
+        "tripod",
+        "wine storage"
+      ]
+    },
+    "shelving": {
+      "mpcat40": [
+        "shelving"
+      ],
+      "add": [
+        "book rack",
+        "closet shelving",
+        "fireplace shelf",
+        "high shelf",
+        "shelf / cabinet",
+        "shelf cubby",
+        "shower soap shelf",
+        "soap dispenser shelf in shower",
+        "wall soap shelf"
+      ],
+      "remove": [
+        "easel",
+        "shelf clutter",
+        "shoes on shelf",
+        "tripod",
+        "wine storage"
+      ]
+    },
+    "shower": {
+      "mpcat40": [],
+      "add": [
+        "bath shower",
+        "shower",
+        "shower cabin",
+        "shower case",
+        "shower cockpit"
+      ],
+      "remove": []
+    },
+    "sink": {
+      "mpcat40": [
+        "sink"
+      ],
+      "add": [
+        "bath sink",
+        "water basin"
+      ],
+      "remove": []
+    },
+    "sofa": {
+      "mpcat40": [
+        "sofa"
+      ],
+      "add": [
+        "sofa seat"
+      ],
+      "remove": []
+    },
+    "stool": {
+      "mpcat40": [
+        "stool"
+      ],
+      "add": [],
+      "remove": [
+        "footrest"
+      ]
+    },
+    "stools": {
+      "mpcat40": [
+        "stool"
+      ],
+      "add": [],
+      "remove": [
+        "footrest"
+      ]
+    },
+    "storage unit": {
+      "mpcat40": [
+        "cabinet",
+        "shelving"
+      ],
+      "add": [
+        "bureau",
+        "chest of drawer",
+        "chest of drawers",
+        "dresser",
+        "storage unit",
+        "wardrobe"
+      ],
+      "remove": [
+        "cabinet drawer",
+        "cabinet mirror",
+        "cabinet parts",
+        "desk door",
+        "easel",
+        "kitchen cabinet door",
+        "kitchen cabinet drawer",
+        "shelf clutter",
+        "shoes on shelf",
+        "speaker stand",
+        "tripod"
+      ]
+    },
+    "table": {
+      "mpcat40": [
+        "table"
+      ],
+      "add": [
+        "baby changing table",
+        "bedroom table",
+        "bedside table",
+        "drawer sink table",
+        "nightstand"
+      ],
+      "remove": [
+        "stand",
+        "table cloth",
+        "table pad",
+        "tablet"
+      ]
+    },
+    "toilet": {
+      "mpcat40": [],
+      "add": [
+        "toilet"
+      ],
+      "remove": []
+    },
+    "towel": {
+      "mpcat40": [
+        "towel"
+      ],
+      "add": [
+        "hand cloth",
+        "hand towel",
+        "washcloth"
+      ],
+      "remove": [
+        "paper towel",
+        "paper towels"
+      ]
+    },
+    "washbasin": {
+      "mpcat40": [
+        "sink"
+      ],
+      "add": [
+        "bath sink",
+        "water basin"
+      ],
+      "remove": []
+    }
+  },
+  "synonym_groups": [
+    [
+      "chair",
+      "chair /w clutter"
+    ],
+    [
+      "stool",
+      "stools"
+    ],
+    [
+      "couch",
+      "sofa"
+    ],
+    [
+      "computer chair",
+      "desk chair",
+      "office chair"
+    ],
+    [
+      "dining chair",
+      "dinner chair"
+    ],
+    [
+      "folded chair",
+      "folding chair"
+    ],
+    [
+      "bean bag chair",
+      "beanbag",
+      "beanbag chair"
+    ],
+    [
+      "dining table",
+      "dinner table"
+    ],
+    [
+      "bedroom table",
+      "bedside table",
+      "nightstand"
+    ],
+    [
+      "cabinet",
+      "cabinet /otherroom",
+      "cabinet /w clutter",
+      "cabinet /w cluttered art"
+    ],
+    [
+      "bath cabinet",
+      "bathroom cabinet"
+    ],
+    [
+      "cabinet kitchen",
+      "kitchen cabinet"
+    ],
+    [
+      "kitchen cabinet lower",
+      "kitchen lower cabinet",
+      "lower cabinet"
+    ],
+    [
+      "closet",
+      "wardrobe"
+    ],
+    [
+      "shelf",
+      "shelving"
+    ],
+    [
+      "shoe rack",
+      "shoes rack"
+    ],
+    [
+      "lamp",
+      "light",
+      "light fixture",
+      "lighting fixture"
+    ],
+    [
+      "display",
+      "led tv",
+      "monitor",
+      "tv",
+      "wall tv"
+    ],
+    [
+      "icebox",
+      "mini fridge",
+      "refrigerator"
+    ],
+    [
+      "bureau",
+      "chest drawer",
+      "chest of drawer",
+      "chest of drawers",
+      "dresser"
+    ],
+    [
+      "bin",
+      "dustbin",
+      "recycle bin",
+      "trash can"
+    ],
+    [
+      "cushion",
+      "pillow"
+    ],
+    [
+      "basin",
+      "sink",
+      "washbasin"
+    ],
+    [
+      "bath",
+      "bath tub",
+      "bathtub"
+    ],
+    [
+      "counter",
+      "countertop",
+      "countertop /otherroom"
+    ],
+    [
+      "island",
+      "kitchen island"
+    ],
+    [
+      "bathroom counter",
+      "washbasin counter"
+    ],
+    [
+      "photo",
+      "photos"
+    ],
+    [
+      "painting",
+      "painting /otherroom"
+    ],
+    [
+      "flower",
+      "flowers"
+    ],
+    [
+      "paper towel",
+      "paper towels"
+    ]
+  ],
+  "surface_head_aliases": {
+    "seating": "seat"
+  },
+  "region_generic_rules": {
+    "bathroom": [
+      "bathroom",
+      "toilet"
+    ]
+  },
+  "region_surface_forms": {
+    "toilet": "toilet room",
+    "closet": "walk-in closet"
+  },
+  "default_rule": "identity after raw-category normalization; preserve self; do not expand whole misc/objects buckets; do not transitively close directional generic rules; use full semantic universe before proposal eligibility or navigation status",
+  "denotation_algorithm": "Apply generic bucket/add/remove rules with reflexive self; union denotations for each disjoint lexical synonym group; then expand member spellings through these lexical groups only, never recursively through generic denotations.",
+  "must_remain_admissible_categories": [
+    "bathroom counter",
+    "bathtub",
+    "bed",
+    "bench",
+    "carpet",
+    "christmas tree",
+    "clock",
+    "curtain",
+    "desk lamp",
+    "fan",
+    "floor lamp",
+    "mat",
+    "rug",
+    "showerhead",
+    "sofa",
+    "stool",
+    "table lamp",
+    "toilet"
+  ],
+  "expected_memberships": {
+    "chair": [
+      "desk chair",
+      "piano stool",
+      "stool"
+    ],
+    "stool": [
+      "piano stool",
+      "stools"
+    ],
+    "plant": [
+      "bonsai tree",
+      "christmas tree",
+      "decorative plant"
+    ],
+    "tv": [
+      "led tv",
+      "wall tv"
+    ],
+    "table": [
+      "desk",
+      "dining table",
+      "nightstand"
+    ],
+    "bed": [
+      "bunk bed",
+      "crib"
+    ],
+    "counter": [
+      "bathroom counter",
+      "kitchen island"
+    ],
+    "showerhead": [
+      "showerhead"
+    ]
+  },
+  "expected_nonmemberships": {
+    "table": [
+      "table cloth",
+      "table pad",
+      "tablet"
+    ],
+    "bed": [
+      "bed sheet",
+      "bedframe",
+      "bedpost",
+      "headboard"
+    ],
+    "toilet": [
+      "bidet",
+      "cat litter box",
+      "cat toilet",
+      "toilet seat"
+    ],
+    "shower": [
+      "shower floor",
+      "shower wall",
+      "showerhead"
+    ],
+    "mirror": [
+      "mirror frame"
+    ],
+    "towel": [
+      "paper towel",
+      "paper towels"
+    ],
+    "tv": [
+      "bulletin board",
+      "whiteboard"
+    ],
+    "bookshelf": [
+      "bathroom shelf",
+      "easel",
+      "tripod"
+    ],
+    "wardrobe": [
+      "storage unit"
+    ],
+    "stool": [
+      "chair"
+    ],
+    "photo": [
+      "poster"
+    ],
+    "flower": [
+      "christmas tree",
+      "tree"
+    ]
+  }
+}
