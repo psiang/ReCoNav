@@ -62,7 +62,7 @@ On Ubuntu, install the rendering libraries and Xvfb:
 
 ```bash
 sudo apt-get update
-sudo apt-get install libosmesa6 libgl1-mesa-dri libegl1-mesa libglx-mesa0 xvfb
+sudo apt-get install build-essential libosmesa6 libgl1-mesa-dri libegl1-mesa libglx-mesa0 xvfb
 ```
 
 The worker overlays include `worker-geometry.lock` (Shapely 2.0.7, compatible with Python 3.8/3.9). The core solver retains Shapely 2.1.2.
@@ -121,13 +121,14 @@ refs.mkdir(exist_ok=True)
 PYTHON
 ```
 
-Use that same `HF_HOME` for workers; episodes run offline.
+Use that same `HF_HOME` for workers and the GSAM2 service; episodes run offline.
 
 DualVLN/SNav use Habitat's Mesa EGL renderer. On Ubuntu, set `LIBGL_ALWAYS_SOFTWARE=1`, `EGL_PLATFORM=surfaceless` and `__EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/50_mesa.json` for the worker; adjust the vendor-file location for your system. Model inference still uses the selected CUDA device.
 
 Place model assets under these external-root locations:
 
 - `runtime_assets/dualvln/InternVLA-N1-DualVLN/`: Git LFS clone of [InternRobotics/InternVLA-N1-DualVLN](https://huggingface.co/InternRobotics/InternVLA-N1-DualVLN), checked out at `a698a9e898b4001621a319e1bc89f02ec715cc86`; run `git lfs pull`. Preserve `.git` and the four full weight shards.
+- `runtime_assets/dualvln/checkpoints/depth_anything_v2_metric_hypersim_vits.pth`: download the [Depth Anything V2 Metric Hypersim Small checkpoint](https://huggingface.co/depth-anything/Depth-Anything-V2-Metric-Hypersim-Small/blob/3bc65d4e14a6786a61acec16453c50e12bf5f338/depth_anything_v2_metric_hypersim_vits.pth) used by DualVLN's depth encoder.
 - GC-VLN: install `third_party/GLIP`, `third_party/ModelServer`, `third_party/Grounded-SAM-2` and their weights following the pinned upstream README. Its upstream tree is the default runtime directory; an optional `runtime_assets/gcvln/` overlay can instead hold the same source layout and weights.
 - `artifacts/canav/`: original GroundingDINO/SAM assets under `grounded_sam/`, and the upstream BLIP2/VQA model and processor files under `blip2/` and `vqa/`, from [CA-Nav's checkpoint download](https://drive.google.com/drive/folders/1fHUDDnK-gNNABrcb5u_F93mAQhu8tC8z?usp=sharing). Original R2R reply files are unnecessary for this benchmark.
 - `runtime_assets/snav/SNav-7B/` and `runtime_assets/snav/siglip-so400m-patch14-384/`; apply `environments/snav-overrides.lock` on Python 3.9 / Torch 2.5.1-cu124.
@@ -158,10 +159,24 @@ CUDA_VISIBLE_DEVICES=0 python -m reconav.serve qwen \
   --model-path /path/to/qwen/checkpoint --external-vision --port 8009
 ```
 
-GC-VLN native additionally needs its GSAM2 service. Follow the upstream **GC-VLN-Server Python 3.10** setup and `environments/gcvln-server.lock` in a separate environment from its Habitat/Python 3.9 worker. From the upstream GC-VLN directory, put the ReCoNav checkout on `PYTHONPATH` and run:
+GC-VLN native additionally needs a separate **Python 3.10** GSAM2 environment. Create it below, install the CUDA toolkit matching Torch 2.5.1, then run the installation commands from the ReCoNav checkout:
 
 ```bash
-CUDA_VISIBLE_DEVICES=1 python -m reconav.baselines.gcvln.serve --port 7012
+conda create -n reconav-gcvln-server python=3.10 pip
+conda activate reconav-gcvln-server
+python -m pip install setuptools wheel -r environments/gcvln-server.lock
+python -m pip install --no-deps --no-build-isolation -e "$RECONAV_EXTERNAL_ROOT/upstream/GC-VLN/third_party/ModelServer"
+SAM2_BUILD_ALLOW_ERRORS=0 python -m pip install --no-deps --no-build-isolation \
+  -e "$RECONAV_EXTERNAL_ROOT/upstream/GC-VLN/third_party/Grounded-SAM-2"
+python -m pip install --use-pep517 --no-deps --no-build-isolation \
+  -e "$RECONAV_EXTERNAL_ROOT/upstream/GC-VLN/third_party/Grounded-SAM-2/grounding_dino"
+```
+
+From the upstream GC-VLN directory, put the ReCoNav checkout on `PYTHONPATH` and run:
+
+```bash
+HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 CUDA_VISIBLE_DEVICES=1 \
+  python -m reconav.baselines.gcvln.serve --port 7012
 ```
 
 Inspect the matching launcher and run `preflight`, then `smoke` with explicit task IDs before a full `run`. Preflight checks inputs; smoke executes the policy:
@@ -258,3 +273,5 @@ python -m reconav.baselines.runners.native run --method snav --split hard44 \
 ```
 
 Choose timing separately from `--split`. For the paper's original external execution protocol, add `--time-protocol "configs/protocols/main.json"`. For Hard44, add `--time-protocol "configs/protocols/hard44.json" --partition hard`. For fresh full runs, use `--time-limit-seconds 0` and collect the new results with `reconav summarize --runs <run-output> --output outputs/report`; this also produces the retrospective 300-second comparison.
+
+GC-VLN appends poses to `trajectory.jsonl` and exports `trajectory.json` at episode end. Its `runtime_summary.json` reports trajectory-recording time under `recording.trajectory.seconds` and diagnostic JSON write time under `recording.instrumentation_write_seconds`. Both remain included in the episode's wall time.

@@ -1,5 +1,5 @@
 # Recorded compatibility overlay; install into the matching native environment.
--r worker-geometry.lock
+-r habitat033.lock
 aiohappyeyeballs==2.6.1
 aiohttp==3.13.5
 aiosignal==1.4.0
@@ -17,7 +17,6 @@ marshmallow==3.26.2
 multidict==6.7.1
 mypy_extensions==1.1.0
 numexpr==2.10.2
-numpy==1.26.4
 opencv-python-headless==4.11.0.86
 openai==0.28.1
 openapi-schema-pydantic==1.2.4

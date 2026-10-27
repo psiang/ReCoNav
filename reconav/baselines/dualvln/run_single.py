@@ -25,6 +25,14 @@ from reconav.baselines.dualvln.trajectory import DualVLNTrajectory
 
 AUDITED_INTERNNAV_HEAD = "7a5c62400ac45b313d9b709c740b64191556a242"
 AUDITED_CHECKPOINT_HEAD = "a698a9e898b4001621a319e1bc89f02ec715cc86"
+DEPTH_CHECKPOINT = 'depth_anything_v2_metric_hypersim_vits.pth'
+
+
+def depth_checkpoint(runtime_workdir: Path) -> Path:
+    path = runtime_workdir / 'checkpoints' / DEPTH_CHECKPOINT
+    if not path.is_file() or path.stat().st_size < 1_000_000:
+        raise FileNotFoundError('Download the DualVLN depth checkpoint to ' + str(path))
+    return path
 
 
 def _git_value(root: Path, *args: str) -> str:
@@ -137,6 +145,7 @@ def main() -> int:
     args.output = args.output.resolve()
     args.output.mkdir(parents=True, exist_ok=True)
     verify_release(args.upstream, args.checkpoint)
+    depth_checkpoint(args.runtime_workdir)
     policy_input = load_policy_input(args.task)
     config = released_dualvln_config(args.checkpoint, device=args.device)
     write_policy_manifest(

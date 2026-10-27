@@ -1,0 +1,5 @@
+# Shared pip pins for Habitat-Sim 0.3.3 policy workers.
+-r worker-geometry.lock
+numpy==1.26.4
+pillow==10.4.0
+imageio-ffmpeg==0.6.0

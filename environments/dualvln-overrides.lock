@@ -1,9 +1,8 @@
 # Python 3.9 / Habitat-Sim 0.3.3; use InternNav's habitat_requirements profile.
 # The nextdit_async checkpoint uses Diffusers' pre-0.33 checkpointing interface.
--r worker-geometry.lock
+-r habitat033.lock
 torch==2.5.1
 torchvision==0.20.1
-numpy==1.26.4
 opencv-python-headless==4.11.0.86
 accelerate==1.4.0
 diffusers==0.32.2

@@ -167,6 +167,9 @@ def main():
             runtime = release_paths.runtime_path('snav')
             identity['release_assets'] = release_assets(runtime / 'SNav-7B', runtime / 'siglip-so400m-patch14-384')
             identity['snav_protocol'] = {'max_steps': 70, 'history_frames': 16, 'actions_per_inference': 4, 'max_new_tokens': 128, 'dtype': 'bfloat16', 'attention': 'sdpa'}
+        if args.method == 'dualvln':
+            from reconav.baselines.dualvln.run_single import depth_checkpoint
+            identity['depth_checkpoint'] = file_identity(depth_checkpoint(release_paths.runtime_path('dualvln')))
         if args.condition == 'asg':
             physical = read(args.asset_dir / policy['scene_id'] / 'physical_free_space.json')
             if physical['source_identity'] != asg_identity(assets['asg']) or physical['graph_id'] != graph['graph_id']:
