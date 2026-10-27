@@ -14,6 +14,7 @@ from reconav.baselines.common.protocol import BENCHMARK, ROOT, asg_identity, dig
 from reconav.baselines.common.runtime import _environment, _preprocess_command, _runtime_command
 from reconav.baselines.common.robot import CACHE, PROFILE, VERSIONS, mesh_identity
 from reconav.baselines.common.g0 import validate_assets, identity as g0_identity
+from reconav.baselines.common.rendering import worker_environment as rendering_environment, configuration as rendering_configuration, backend as rendering_backend
 from reconav.baselines.common.time_budget import add_arguments, TimePolicy, BudgetTimeout, ResourceExhausted, wait_process, resource_reason, incomplete, record_plan, reporting, TERMINAL, diagnostic_read
 
 def runtime_environment(method, gpu, base_url):
@@ -29,7 +30,7 @@ def runtime_environment(method, gpu, base_url):
     env.update(HF_HUB_OFFLINE='1', TRANSFORMERS_OFFLINE='1', OMP_NUM_THREADS='2', OPENBLAS_NUM_THREADS='2', MKL_NUM_THREADS='2', PYTHONUNBUFFERED='1')
     if method == 'gcvln':
         env['PYTHONPATH'] = ':'.join(map(str, [ROOT, release_paths.upstream_path('GC-VLN'), release_paths.compat_path('gcvln'), release_paths.upstream_path('GC-VLN/third_party/GLIP'), release_paths.upstream_path('GC-VLN/third_party/ModelServer/src'), release_paths.runtime_path('gcvln/third_party/ModelServer/src'), release_paths.upstream_path('GC-VLN/third_party/habitat-lab')]))
-    return env
+    return rendering_environment(env)
 
 def execute(command, cell, name, env, timeout, budget=None):
     env = dict(env)
@@ -39,7 +40,10 @@ def execute(command, cell, name, env, timeout, budget=None):
     if executable.parent.name == 'bin':
         env['LD_LIBRARY_PATH'] = str(executable.parent.parent / 'lib') + (':' + env['LD_LIBRARY_PATH'] if env.get('LD_LIBRARY_PATH') else '')
     if env.get('RECONAV_BASELINE') == 'canav' or '/envs/canav/' in str(executable):
-        env.update(__GLX_VENDOR_LIBRARY_NAME='mesa', LIBGL_ALWAYS_SOFTWARE='1', LD_PRELOAD=(str(release_paths.environment_path('canav', 'lib/libstdc++.so.6')) + ':' + os.environ.get('RECONAV_MESA_GLX_LIBRARY', 'libGLX_mesa.so.0')), PYTHONPATH=':'.join(map(str, [ROOT, release_paths.upstream_path('CA-Nav-code'), release_paths.upstream_path('habitat-lab-canav'), release_paths.upstream_path('GroundingDINO-canav'), release_paths.upstream_path('segment-anything-canav')])))
+        env.update(LD_PRELOAD=str(release_paths.environment_path('canav', 'lib/libstdc++.so.6')), PYTHONPATH=':'.join(map(str, [ROOT, release_paths.upstream_path('CA-Nav-code'), release_paths.upstream_path('habitat-lab-canav'), release_paths.upstream_path('GroundingDINO-canav'), release_paths.upstream_path('segment-anything-canav')])))
+        if rendering_backend(env) == 'mesa':
+            env['__GLX_VENDOR_LIBRARY_NAME'] = 'mesa'
+            env['LD_PRELOAD'] += ':' + os.environ.get('RECONAV_MESA_GLX_LIBRARY', 'libGLX_mesa.so.0')
     with (cell / (name + '.log')).open('w') as log:
         proc = subprocess.Popen(command, cwd=ROOT, env=env, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
         code = wait_process(proc, timeout, budget, cell,
@@ -143,6 +147,7 @@ def main():
         starts = {r['task_id']: r for r in start_doc['rows']}
     from reconav.baselines.common.client import local_model_identity
     server_identity = local_model_identity(args.local_base_url) if args.method not in {'dualvln', 'snav'} and not args.preprocess_cache else None
+    env = runtime_environment(args.method, args.gpu, args.local_base_url)
     sources = {str(p.relative_to(ROOT)): file_digest(p) for folder in (ROOT / 'reconav/baselines' / args.method, ROOT / 'reconav/baselines/common', ROOT / 'reconav/baselines/runners') for p in sorted(folder.glob('*.py'))}
     rows = []
     for task in tasks:
@@ -160,6 +165,7 @@ def main():
         identity = {'task_sha256': file_digest(task), 'policy': policy, 'method': args.method, 'condition': args.condition, 'robot_profile': PROFILE, 'physical_mesh': physical_mesh, 'exact_start': check, 'adapter_sources': sources, 'asg': asg_identity(assets['asg']), 'language_model': 'qwen3.8-27b/none' if args.method not in {'dualvln', 'snav'} else 'released-checkpoint', 'local_base_url': args.local_base_url if args.method not in {'dualvln', 'snav'} else None}
         identity.update(time_policy.settings(task.stem))
         identity['server_identity'] = server_identity
+        identity['rendering'] = rendering_configuration(env)
         if args.method in {'canav', 'gcvln'}:
             identity['language_prediction_mode'] = 'saved_first_response' if args.preprocess_cache else 'fresh'
         if args.method == 'snav':
@@ -183,7 +189,6 @@ def main():
     if args.mode == 'preflight':
         print({'tasks': len(rows), 'supported': sum((r['supported'] for r in rows))}, flush=True)
         return 0
-    env = runtime_environment(args.method, args.gpu, args.local_base_url)
     for row in rows:
         task = Path(row['task'])
         cell = args.output / args.method / task.parent.name / task.stem

@@ -46,13 +46,17 @@ def _runtime_command(baseline: str, task: Path, cell: Path, gpu: int, server_por
     assets = _assets_for_task(task)
     common = ['--task', str(task), '--scene', str(assets['scene']), '--asg', str(assets['asg']), '--evaluator-python', str(DEFAULTS['evaluator_python']), '--output', str(cell)]
     if baseline == 'canav':
-        return ['xvfb-run', '-a', '-s', '-screen 0 1280x1024x24 +extension GLX +render -noreset', python, '-m', 'reconav.baselines.canav.run_single', *common, '--scene-root', str(DEFAULTS['scene_root']), '--upstream', str(release_paths.upstream_path('CA-Nav-code')), '--habitat-lab', str(release_paths.upstream_path('habitat-lab-canav')), '--artifacts', (str(release_paths.external_root() / 'artifacts/canav')), '--variant', 'qwen-local']
+        from reconav.baselines.common.rendering import backend
+        command = [python, '-m', 'reconav.baselines.canav.run_single', *common, '--scene-root', str(DEFAULTS['scene_root']), '--upstream', str(release_paths.upstream_path('CA-Nav-code')), '--habitat-lab', str(release_paths.upstream_path('habitat-lab-canav')), '--artifacts', (str(release_paths.external_root() / 'artifacts/canav')), '--variant', 'qwen-local']
+        return command if backend() == 'nvidia' else ['xvfb-run', '-a', '-s', '-screen 0 1280x1024x24 +extension GLX +render -noreset', *command]
     if baseline == 'gcvln':
+        from reconav.baselines.common.rendering import backend, simulator_gpu_id
         upstream = release_paths.upstream_path('GC-VLN')
         runtime = release_paths.runtime_path('gcvln')
         if not (runtime / 'src').is_dir():
             runtime = upstream
-        return ['xvfb-run', '-a', '-s', '-screen 0 1280x1024x24 +extension GLX +render -noreset', python, '-m', 'reconav.baselines.gcvln.run_single', *common, '--scene-root', str(DEFAULTS['scene_root']), '--upstream', str(upstream), '--runtime-root', str(runtime), '--server-port', str(server_port), '--gpu-id', '0', '--simulator-gpu-id', '-1']
+        command = [python, '-m', 'reconav.baselines.gcvln.run_single', *common, '--scene-root', str(DEFAULTS['scene_root']), '--upstream', str(upstream), '--runtime-root', str(runtime), '--server-port', str(server_port), '--gpu-id', '0', '--simulator-gpu-id', str(simulator_gpu_id())]
+        return command if backend() == 'nvidia' else ['xvfb-run', '-a', '-s', '-screen 0 1280x1024x24 +extension GLX +render -noreset', *command]
     if baseline == 'dualvln':
         return [python, '-m', 'reconav.baselines.dualvln.run_single', *common, '--upstream', str(release_paths.upstream_path('InternNav')), '--checkpoint', str(release_paths.runtime_path('dualvln/InternVLA-N1-DualVLN')), '--runtime-workdir', str(release_paths.runtime_path('dualvln')), '--device', 'cuda:0']
     raise ValueError('Unsupported paper baseline')

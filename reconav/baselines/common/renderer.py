@@ -7,12 +7,13 @@ from typing import Any
 import numpy as np
 TRIMESH_TO_HABITAT = np.array([[1, 0, 0, 0], [0, 0, 1, 0], [0, -1, 0, 0], [0, 0, 0, 1]], dtype=np.float64)
 
-class OSMesaRGBD:
+class RGBDRenderer:
 
     def __init__(self, geometry: Path, *, width: int, height: int, hfov: float) -> None:
         if 'semantic' in geometry.name.lower() or not geometry.is_file():
             raise ValueError(f'expected non-semantic HM3D GLB: {geometry}')
-        os.environ.setdefault('PYOPENGL_PLATFORM', 'osmesa')
+        from reconav.baselines.common.rendering import backend
+        os.environ.setdefault('PYOPENGL_PLATFORM', 'egl' if backend() == 'nvidia' else 'osmesa')
         import pyrender
         import trimesh
         source = trimesh.load(geometry, force='scene', process=False)
@@ -24,6 +25,11 @@ class OSMesaRGBD:
         self.camera = pyrender.PerspectiveCamera(yfov=vertical_fov, aspectRatio=width / height)
         self.camera_node = self.scene.add(self.camera, pose=np.eye(4))
         self.renderer = pyrender.OffscreenRenderer(width, height)
+        from OpenGL import GL
+        from reconav.baselines.common.rendering import configuration
+        self.metadata = {**configuration(), 'vendor': GL.glGetString(GL.GL_VENDOR).decode(),
+                         'renderer': GL.glGetString(GL.GL_RENDERER).decode(),
+                         'opengl_version': GL.glGetString(GL.GL_VERSION).decode()}
 
     def render(self, pose: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         import pyrender
@@ -32,10 +38,10 @@ class OSMesaRGBD:
         return (np.asarray(color)[..., :3].astype(np.uint8), np.asarray(depth, dtype=np.float32))
 
 def _renderer_worker(connection: Any, geometry: str, width: int, height: int, hfov: float) -> None:
-    """Own the OSMesa context in a process isolated from Habitat's GL loader."""
+    """Own the OpenGL context in a process isolated from Habitat's GL loader."""
     try:
-        renderer = OSMesaRGBD(Path(geometry), width=width, height=height, hfov=hfov)
-        connection.send({'ready': True})
+        renderer = RGBDRenderer(Path(geometry), width=width, height=height, hfov=hfov)
+        connection.send({'ready': True, 'rendering': renderer.metadata})
         while True:
             pose = connection.recv()
             if pose is None:
@@ -46,7 +52,7 @@ def _renderer_worker(connection: Any, geometry: str, width: int, height: int, hf
     finally:
         connection.close()
 
-class OSMesaRendererProcess:
+class RGBDRendererProcess:
 
     def __init__(self, geometry: Path, *, width: int, height: int, hfov: float) -> None:
         context = multiprocessing.get_context('spawn')
@@ -55,8 +61,9 @@ class OSMesaRendererProcess:
         self.process.start()
         child.close()
         message = self.connection.recv()
-        if message != {'ready': True}:
-            raise RuntimeError(f'OSMesa renderer process failed: {message}')
+        if not message.get('ready'):
+            raise RuntimeError(f'RGB-D renderer process failed: {message}')
+        self.metadata = message['rendering']
 
     def render(self, pose: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         self.connection.send(pose)

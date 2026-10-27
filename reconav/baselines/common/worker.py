@@ -21,7 +21,8 @@ def main():
     config = read(args.config)
     output = Path(config['output'])
     output.mkdir(parents=True, exist_ok=True)
-    if os.environ.get('CUDA_VISIBLE_DEVICES') != '':
+    from reconav.baselines.common.rendering import backend
+    if backend() == 'mesa' and os.environ.get('CUDA_VISIBLE_DEVICES') != '':
         raise RuntimeError('this worker requires CPU-only rendering and empty CUDA_VISIBLE_DEVICES')
     upstream = Path(config['upstream'])
     head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=upstream, text=True).strip()

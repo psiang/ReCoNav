@@ -53,7 +53,8 @@ class RenderOnlyHabitat:
         import habitat_sim
         sim = habitat_sim.SimulatorConfiguration()
         sim.scene_id = str(scene)
-        sim.gpu_device_id = -1
+        from reconav.baselines.common.rendering import simulator_gpu_id
+        sim.gpu_device_id = simulator_gpu_id()
         sim.enable_physics = False
         agent = habitat_sim.agent.AgentConfiguration()
         agent.radius, agent.height = PROFILE['radius_m'], PROFILE['height_m']
@@ -131,6 +132,8 @@ class G0VectorEnv:
     def observation(self):
         if self.renderer is None:
             self.renderer = RenderOnlyHabitat(self.config, self.scene)
+            from reconav.baselines.common.rendering import configuration
+            write(self.output / 'rendering.json', configuration())
         obs = self.renderer.observe(self.position, self.yaw)
         gc = world_to_gc([self.position[0], self.position[2]], self.policy)
         obs.update(gps=np.array([gc[0], -gc[1]], dtype=np.float32),

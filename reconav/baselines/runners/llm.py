@@ -16,12 +16,18 @@ from urllib.request import urlopen
 from urllib.parse import urlparse
 from reconav.baselines.common.protocol import ASG_ROOT, BENCHMARK, ROOT, SCENE_ROOT, COMMITS, LLM_METHODS, asg_identity, cell_identity, digest, discover, eligible_resume, file_digest, file_identity, policy_payload, read, scene_assets, write
 from reconav.baselines.common.robot import CACHE, PROFILE, mesh_identity, require_asg_profile
+from reconav.baselines.common.rendering import worker_environment as rendering_environment, configuration as rendering_configuration, backend as rendering_backend
 from reconav.baselines.common.time_budget import add_arguments, TimePolicy, BudgetTimeout, ResourceExhausted, wait_process, resource_reason, incomplete, record_plan, reporting, diagnostic_read
 
 def worker_environment(worker_python=None):
     release_paths.configure()
     env = dict(os.environ)
-    env.update(CUDA_VISIBLE_DEVICES='', PYOPENGL_PLATFORM='osmesa', LIBGL_ALWAYS_SOFTWARE='1', OMP_NUM_THREADS='1', OPENBLAS_NUM_THREADS='1', MKL_NUM_THREADS='1', PYTHONPATH=str(ROOT), PYTHONDONTWRITEBYTECODE='1')
+    env = rendering_environment(env)
+    env.update(OMP_NUM_THREADS='1', OPENBLAS_NUM_THREADS='1', MKL_NUM_THREADS='1', PYTHONPATH=str(ROOT), PYTHONDONTWRITEBYTECODE='1')
+    if rendering_backend(env) == 'mesa':
+        env['CUDA_VISIBLE_DEVICES'] = ''
+    else:
+        env['EGL_DEVICE_ID'] = env.get('RECONAV_RENDER_GPU', '0')
     env['LD_LIBRARY_PATH'] = (str(Path(worker_python).parent.parent / 'lib') if worker_python else str(release_paths.environment_path('navgpt', 'lib'))) + (':' + env['LD_LIBRARY_PATH'] if env.get('LD_LIBRARY_PATH') else '')
     for key in ('NO_PROXY', 'no_proxy'):
         env[key] = ','.join(filter(None, [env.get(key), '127.0.0.1', 'localhost']))
@@ -174,6 +180,9 @@ def main():
                 source_hashes = {name: file_digest(Path(__file__).resolve().parents[1] / "common" / name) for name in ('protocol.py', 'world.py', 'worker.py', 'client.py', 'robot.py', 'g0.py')}
                 settings = {'model': args.model, 'reasoning_effort': args.reasoning_effort, 'robot_profile': PROFILE, 'api_timeout': args.api_timeout, 'max_output_tokens': args.max_output_tokens, 'max_steps': 10 if method == 'navgpt' else 15, 'upstream_commit': commit, 'adapter_sources': source_hashes, 'mode': 'full_episode'}
                 settings.update(time_policy.settings(path.stem))
+                settings['rendering'] = rendering_configuration(env)
+                source_hashes['rendering.py'] = file_digest(Path(__file__).resolve().parents[1] / 'common/rendering.py')
+                source_hashes['renderer.py'] = file_digest(Path(__file__).resolve().parents[1] / 'common/renderer.py')
                 source_hashes['time_budget.py'] = file_digest(Path(__file__).resolve().parents[1] / 'common/time_budget.py')
                 source_hashes['run.py'] = file_digest(Path(__file__))
                 source_hashes['context.py'] = file_digest(Path(__file__).resolve().parents[1] / 'common/context.py')

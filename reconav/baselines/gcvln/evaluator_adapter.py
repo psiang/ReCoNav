@@ -60,6 +60,9 @@ class GCVLNBenchmarkEnv(GCVLNEnv):
             raise RuntimeError('unsupported exact start: refusing native navmesh snapping')
         self._trajectory.reset(*self._actual_pose())
         self._trajectory.write()
+        from reconav.baselines.common.rendering import configuration
+        from reconav.baselines.common.protocol import write
+        write(self._trajectory.output.parent / 'rendering.json', configuration())
         return observations
 
     def wrap_act(self, act: Any, vis_info: Any) -> Any:

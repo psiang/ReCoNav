@@ -76,7 +76,8 @@ def _simulator(scene: Path, config: dict[str, Any]) -> Any:
 
     simulator = habitat_sim.SimulatorConfiguration()
     simulator.scene_id = str(scene.resolve())
-    simulator.gpu_device_id = -1
+    from reconav.baselines.common.rendering import simulator_gpu_id
+    simulator.gpu_device_id = simulator_gpu_id()
     simulator.enable_physics = False
 
     camera = config["camera"]
@@ -181,6 +182,9 @@ def main() -> int:
         from internnav.configs.agent import AgentCfg
 
         sim = _simulator(args.scene, config)
+        from reconav.baselines.common.rendering import configuration as rendering_configuration
+        from reconav.baselines.common.protocol import write
+        write(args.output / 'rendering.json', rendering_configuration())
         state = habitat_sim.AgentState()
         state.position = np.asarray(policy_input.start_position, dtype=np.float32)
         state.rotation = quat_from_coeffs(np.asarray(heading_to_habitat_xyzw(policy_input.start_heading)))

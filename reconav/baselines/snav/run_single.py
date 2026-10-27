@@ -105,9 +105,10 @@ def main():
     torch.set_num_threads(2)
     torch.manual_seed(0)
     np.random.seed(0)
-    # Keep upstream's -1 EGL selection: this host provides Mesa CPU rendering.
-    # CUDA model inference remains isolated by the launcher's device selection.
-    sim, agent = create_simulator(args.scene, 384, 384, False, -1)
+    from reconav.baselines.common.rendering import simulator_gpu_id, configuration
+    sim, agent = create_simulator(args.scene, 384, 384, False, simulator_gpu_id())
+    rendering = configuration()
+    write(args.output / 'rendering.json', rendering)
     recorder = SNavTrajectory(args.output/'trajectory.json', item.benchmark_task_id)
     calls = []
     started = time.monotonic()
@@ -135,7 +136,7 @@ def main():
             'transformers_version':__import__('transformers').__version__,
             'input_output_embeddings_tied':False,
             'release_tensor_checks':tensor_checks,
-            'rendering':'upstream EGL -1, Mesa llvmpipe CPU; model on isolated CUDA device'})
+            'rendering':rendering})
         original_generate = model.generate
         original_prepare = model.prepare_inputs_labels_for_multimodal
         effective = {}

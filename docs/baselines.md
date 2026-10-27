@@ -76,7 +76,7 @@ python -m pip install --no-build-isolation \
 python -m pip install --no-build-isolation -r environments/dualvln-overrides.lock
 ```
 
-Compatibility package pins are under `environments/`. In each NavGPT/MapGPT worker, run `pip install -r environments/navgpt-compat.lock -r environments/rendering.lock`. For CPU image rendering, install system `libosmesa6` and set `PYOPENGL_PLATFORM=osmesa`. CA-Nav and GC-VLN also use Xvfb.
+Compatibility package pins are under `environments/`. In each NavGPT/MapGPT worker, run `pip install -r environments/navgpt-compat.lock -r environments/rendering.lock`.
 
 In SNav's environment, run `pip install -r environments/snav-overrides.lock`. In each formal-baseline environment, run `pip install -r environments/formal-compat.lock`; `formal.yml` supplies the Spot temporal-logic library. For Lang2LTL-2, also run `pip install torch==2.5.1 transformers==4.49.0 sentencepiece==0.2.0` and prepare T5 and its embedding resources below.
 
@@ -123,7 +123,24 @@ PYTHON
 
 Use that same `HF_HOME` for workers and the GSAM2 service; episodes run offline.
 
-DualVLN/SNav use Habitat's Mesa EGL renderer. On Ubuntu, set `LIBGL_ALWAYS_SOFTWARE=1`, `EGL_PLATFORM=surfaceless` and `__EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/50_mesa.json` for the worker; adjust the vendor-file location for your system. Model inference still uses the selected CUDA device.
+Choose the rendering backend before launching:
+
+```bash
+export RECONAV_RENDER_BACKEND=mesa    # Software rendering; default
+# Or, with NVIDIA OpenGL/EGL driver libraries available:
+export RECONAV_RENDER_BACKEND=nvidia
+```
+
+Mesa uses OSMesa for NavGPT/MapGPT and Mesa EGL or Xvfb for Habitat. Its default EGL vendor file is `/usr/share/glvnd/egl_vendor.d/50_mesa.json`; set `__EGL_VENDOR_LIBRARY_FILENAMES` if installed elsewhere. The CA-Nav launcher also loads the worker's C++ runtime and Mesa GLX library for Habitat 0.2.1.
+
+For NVIDIA EGL, use Habitat's headless build in each simulator worker, keeping its listed version. For example, in a Habitat 0.3.3 environment:
+
+```bash
+conda install --freeze-installed -c aihabitat \
+  habitat-sim=0.3.3 habitat-sim-mutex=1.0=headless_nobullet
+```
+
+Native launchers render on the GPU selected by `--gpu`. NavGPT/MapGPT use `RECONAV_RENDER_GPU` (default `0`, EGL device index). Run identities record rendering settings. NavGPT/MapGPT also write OpenGL information to `rendering.json`; Habitat prints its renderer in the worker log. Keep the same rendering backend for a timed comparison.
 
 Place model assets under these external-root locations:
 

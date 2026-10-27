@@ -1,4 +1,4 @@
-"""CPU navigation/observation bridge for discrete external agents on HM3D.
+"""Navigation/observation bridge for discrete external agents on HM3D.
 
 Native mode uses Habitat navmesh only. ASG mode uses the shared scene-only G0
 as its search graph. Both execute and record physical graph edge polylines;
@@ -190,20 +190,22 @@ class World:
         directory = self.cache / 'rgb' / self.condition
         directory.mkdir(parents=True, exist_ok=True)
         pos = self.graph.nodes[self.current]['position']
-        key = digest([file_identity(self.config['render_geometry']), pos, round(angle, 8), 320, 240, 75, 1.25])
+        from reconav.baselines.common.rendering import configuration
+        key = digest([file_identity(self.config['render_geometry']), pos, round(angle, 8), 320, 240, 75, 1.25, configuration()])
         path = directory / (key + '.jpg')
         depth_path = path.with_suffix('.depth.npy')
         if not path.exists() or (self.config.get('method') == 'navgpt' and not depth_path.exists()):
             if self.renderer is None:
-                from reconav.baselines.common.renderer import OSMesaRendererProcess
-                self.renderer = OSMesaRendererProcess(Path(self.config['render_geometry']), width=320, height=240, hfov=75)
+                from reconav.baselines.common.renderer import RGBDRendererProcess
+                self.renderer = RGBDRendererProcess(Path(self.config['render_geometry']), width=320, height=240, hfov=75)
+                write(Path(self.config['output']) / 'rendering.json', self.renderer.metadata)
             c, s = math.cos(angle), math.sin(angle)
             # Heading clockwise is rotation about the world Y axis by -angle.
             pose = np.array([[c, 0, -s, pos[0]], [0, 1, 0, pos[1] + 1.25],
                              [s, 0, c, pos[2]], [0, 0, 0, 1]], dtype=float)
             rgb, depth = self.renderer.render(pose)
             if not np.isfinite(depth).all() or not (depth > 0).any():
-                raise RuntimeError('invalid CPU-rendered RGB-D observation')
+                raise RuntimeError('invalid RGB-D observation')
             Image.fromarray(rgb).save(path, quality=90)
             np.save(depth_path, depth, allow_pickle=False)
         return str(path)
