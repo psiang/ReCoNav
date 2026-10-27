@@ -122,14 +122,19 @@ def main():
                 env.pop(key)
     preflight = []
     native_check_file = CACHE / '0.3.3/exact_starts.json'
-    if 'native' in conditions and not native_check_file.exists():
-        from reconav.baselines.common.native_assets import prepare_native_assets
-        prepare_native_assets('0.3.3')
+    if 'native' in conditions:
+        recorded_ids = {r['task_id'] for r in read(native_check_file)['rows']} if native_check_file.exists() else set()
+        if {path.stem for path in tasks} - recorded_ids:
+            from reconav.baselines.common.native_assets import prepare_native_assets
+            prepare_native_assets('0.3.3', scene_ids={policy_payload(path)['scene_id'] for path in tasks}, scene_root=args.scene_root)
     native_checks = {r['task_id']: r for r in read(native_check_file)['rows']} if native_check_file.exists() else {}
     prepared_graphs = {}
     for path in tasks:
         policy = policy_payload(path)
         assets = scene_assets(policy['scene_id'], args.scene_root, args.asg_root)
+        aligned_mesh = mesh_identity(assets['scene'], '0.3.3') if 'native' in conditions else None
+        if aligned_mesh is not None:
+            assets['navmesh'] = Path(aligned_mesh['navmesh_identity']['path'])
         required = [assets['scene'], assets['render_geometry'], *[assets['asg'] / n for n in ('entity.json', 'geometry.json', 'topology.json')]]
         if 'native' in conditions:
             required.append(assets['navmesh'])
@@ -147,7 +152,6 @@ def main():
             raise RuntimeError('missing/stale ASG start audit: ' + path.stem)
         row['asg_start_supported'] = start.get('supported') if asg_current else None
         native = native_checks.get(path.stem, {})
-        aligned_mesh = mesh_identity(assets['scene'], '0.3.3') if 'native' in conditions else None
         native_current = aligned_mesh is not None and native.get('robot_profile') == PROFILE and (native.get('policy_fingerprint') == digest(policy)) and (native.get('navmesh_identity') == aligned_mesh['navmesh_identity'])
         row['native_start_supported'] = native.get('supported') if native_current else None
         if 'native' in conditions and (not native_current):

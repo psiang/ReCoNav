@@ -16,7 +16,7 @@ def mesh_identity(scene, version, cache=CACHE):
     mesh, manifest = mesh_paths(scene, version, cache)
     if not manifest.exists() or not mesh.exists():
         from reconav.baselines.common.native_assets import prepare_native_assets
-        prepare_native_assets(version, cache, scene_ids=[Path(scene).parent.name])
+        prepare_native_assets(version, cache, scene_ids=[Path(scene).parent.name], scene_root=Path(scene).parent.parent)
     doc = read(manifest)
     if doc.get('robot_profile') != PROFILE or doc.get('habitat_version') != version or doc.get('scene_identity') != file_identity(scene) or (doc.get('navmesh_identity') != file_identity(mesh)):
         raise RuntimeError('stale/mismatched robot navmesh: ' + str(manifest))

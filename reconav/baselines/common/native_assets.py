@@ -6,7 +6,7 @@ from reconav.paths import habitat_navigation_root
 from reconav.baselines.common.protocol import file_digest, file_identity, read, scene_assets, write
 
 
-def prepare_native_assets(version, cache=None, scene_ids=None):
+def prepare_native_assets(version, cache=None, scene_ids=None, scene_root=None):
     from reconav.baselines.common.robot import CACHE, PROFILE
     cache = Path(cache) if cache is not None else CACHE
     source = habitat_navigation_root() / version
@@ -29,7 +29,7 @@ def prepare_native_assets(version, cache=None, scene_ids=None):
     for scene_id, row in manifest['scenes'].items():
         if scene_id not in selected:
             continue
-        scene = scene_assets(scene_id)['scene']
+        scene = (scene_assets(scene_id, scene_root) if scene_root is not None else scene_assets(scene_id))['scene']
         if not scene.is_file():
             raise FileNotFoundError('Native baselines require official HM3D scene files; set RECONAV_HM3D_ROOT: ' + str(scene))
         mesh = source / scene_id / 'robot.navmesh'
