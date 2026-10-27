@@ -8,7 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 DEFAULTS = {
     'scene_root': release_paths.hm3d_root(),
-    'evaluator_python': Path(os.environ.get('RECONAV_EVALUATOR_PYTHON', (str(Path(os.environ['RECONAV_ENV_ASGNAV']) / 'bin/python') if os.environ.get('RECONAV_ENV_ASGNAV') else sys.executable))),
+    'evaluator_python': Path(os.environ.get('RECONAV_EVALUATOR_PYTHON', sys.executable)),
 }
 PYTHONS = {'canav': Path(str(release_paths.environment_path('canav', 'bin/python'))), 'gcvln': Path(str(release_paths.environment_path('gcvln-runtime-py39', 'bin/python'))), 'dualvln': Path(str(release_paths.environment_path('dualvln-official', 'bin/python')))}
 

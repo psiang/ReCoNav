@@ -58,6 +58,13 @@ Omit `--scene` for all scenes. Outputs go under `$RECONAV_CACHE_ROOT/external/ro
 
 Create each selected method's environment with `conda env create -n reconav-<method> -f <Conda base>`, then activate it before installing its packages below. For SNav, use `--prefix "$RECONAV_EXTERNAL_ROOT/runtime_assets/snav/venv"` instead of `-n`.
 
+On Ubuntu, install the rendering libraries and Xvfb:
+
+```bash
+sudo apt-get update
+sudo apt-get install libosmesa6 libgl1-mesa-dri libegl1-mesa libglx-mesa0 xvfb
+```
+
 The worker overlays include `worker-geometry.lock` (Shapely 2.0.7, compatible with Python 3.8/3.9). The core solver retains Shapely 2.1.2.
 
 For DualVLN, activate its Python 3.9 / Habitat-Sim 0.3.3 environment and install the CUDA toolkit matching Torch. Install Torch before building FlashAttention:

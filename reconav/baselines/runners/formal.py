@@ -136,7 +136,7 @@ def main():
         print({'tasks': len(rows), 'supported': sum((r['supported'] for r in rows))})
         return 0
     release_paths.configure()
-    env = dict(os.environ, CUDA_VISIBLE_DEVICES='', HF_HUB_OFFLINE='1', TRANSFORMERS_OFFLINE='1', OMP_NUM_THREADS='4', OPENBLAS_NUM_THREADS='4', MKL_NUM_THREADS='4', PYTHONUNBUFFERED='1', PYTHONPATH=str(ROOT) + ':' + str(release_paths.runtime_path('formal/deps')))
+    env = dict(os.environ, CUDA_VISIBLE_DEVICES='', HF_HUB_OFFLINE='1', TRANSFORMERS_OFFLINE='1', OMP_NUM_THREADS='4', OPENBLAS_NUM_THREADS='4', MKL_NUM_THREADS='4', PYTHONUNBUFFERED='1', PYTHONPATH=str(ROOT))
     for key in list(env):
         if any((s in key.upper() for s in ('API_KEY', 'OPENAI_KEY', 'GEMINI_KEY'))):
             env.pop(key, None)

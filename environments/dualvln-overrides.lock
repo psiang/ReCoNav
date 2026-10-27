@@ -4,6 +4,7 @@
 torch==2.5.1
 torchvision==0.20.1
 numpy==1.26.4
+opencv-python-headless==4.11.0.86
 accelerate==1.4.0
 diffusers==0.32.2
 transformers==4.51.0
