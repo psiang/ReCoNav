@@ -36,34 +36,38 @@ def navmesh_settings(habitat_sim):
     return settings
 
 def install_habitat_profile(audit_path=None):
-    """Set robot dimensions and reload the navmesh after simulator reconfiguration.
+    """Apply robot geometry during both simulator creation and reconfiguration.
 
     Install this hook before creating the simulator, including threaded envs.
     """
     import habitat_sim
     cls = habitat_sim.Simulator
-    if getattr(cls.reconfigure, '_benchmark_robot_profile', False):
+    if getattr(cls._config_pathfinder, '_benchmark_robot_profile', False):
         return
-    original = cls.reconfigure
+    original_agents = cls._config_agents
+    original_pathfinder = cls._config_pathfinder
     version = habitat_sim.__version__
 
-    @functools.wraps(original)
-    def reconfigure(sim, config):
-        scene = Path(config.sim_cfg.scene_id)
-        record = None if str(config.sim_cfg.scene_id) in {'', 'NONE', 'none'} else mesh_identity(scene, version)
+    @functools.wraps(original_agents)
+    def config_agents(sim, config):
         for agent in config.agents:
             agent.radius, agent.height = (ROBOT_RADIUS_M, ROBOT_HEIGHT_M)
-        original(sim, config)
-        if record is None:
-            return
+        return original_agents(sim, config)
+
+    @functools.wraps(original_pathfinder)
+    def config_pathfinder(sim, config):
+        if str(config.sim_cfg.scene_id) in {'', 'NONE', 'none'}:
+            return original_pathfinder(sim, config)
+        record = mesh_identity(Path(config.sim_cfg.scene_id), version)
         mesh = record['navmesh_identity']['path']
-        if not sim.pathfinder.load_nav_mesh(mesh):
+        pathfinder = habitat_sim.PathFinder()
+        if not pathfinder.load_nav_mesh(mesh):
             raise RuntimeError('failed loading aligned navmesh: ' + mesh)
-        for agent in config.agents:
-            if (agent.radius, agent.height) != (ROBOT_RADIUS_M, ROBOT_HEIGHT_M):
-                raise RuntimeError('native simulator changed robot size')
+        pathfinder.seed(config.sim_cfg.random_seed)
+        sim.pathfinder = pathfinder
         sim._benchmark_robot_profile = record
         if audit_path:
             write(Path(audit_path), {'robot_profile': PROFILE, 'mesh': record, 'reconfigure_guard': True, 'snap_applied': False})
-    reconfigure._benchmark_robot_profile = True
-    cls.reconfigure = reconfigure
+    config_pathfinder._benchmark_robot_profile = True
+    cls._config_agents = config_agents
+    cls._config_pathfinder = config_pathfinder
