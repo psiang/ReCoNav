@@ -204,7 +204,7 @@ class World:
             pose = np.array([[c, 0, -s, pos[0]], [0, 1, 0, pos[1] + 1.25],
                              [s, 0, c, pos[2]], [0, 0, 0, 1]], dtype=float)
             rgb, depth = self.renderer.render(pose)
-            if not np.isfinite(depth).all() or not (depth > 0).any():
+            if not np.isfinite(depth).all():
                 raise RuntimeError('invalid RGB-D observation')
             Image.fromarray(rgb).save(path, quality=90)
             np.save(depth_path, depth, allow_pickle=False)
