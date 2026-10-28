@@ -24,12 +24,27 @@ hf download google/gemma-4-31B-it \
   --local-dir "$RECONAV_MODEL_ROOT/gemma"
 ```
 
-Launch one service in a separate terminal:
+The paper used four NVIDIA RTX 4090 GPUs with about 48 GB memory each:
+
+| Backbone | Services | GPUs per service | Task workers | FP8 path |
+|---|---:|---:|---:|---|
+| Qwen | 2 | 2 | 8 total | Native W8A8; `CutlassFP8ScaledMMLinearKernel` for `Fp8LinearMethod` |
+| Gemma | 1 | 4 | 4 | Unquantized checkpoint |
+
+The server lock pins vLLM 0.19.1, Torch 2.10.0, Transformers 5.8.1 and XGrammar 0.2.1. The launch profiles use XGrammar with `disable_any_whitespace=true`. A800/A100 GPUs use weight-only W8A16 Marlin for the Qwen FP8 checkpoint; use RTX 4090 GPUs to match the paper's hardware and FP8 path. See [vLLM's FP8 hardware support](https://docs.vllm.ai/en/v0.19.1/features/quantization/fp8/).
+
+For Qwen, launch each service in a separate terminal:
 
 ```bash
 CUDA_VISIBLE_DEVICES=0,1 .venv-server/bin/python -m reconav.serve qwen \
   --model-path "$RECONAV_MODEL_ROOT/qwen" --port 8008
-# Or:
+CUDA_VISIBLE_DEVICES=2,3 .venv-server/bin/python -m reconav.serve qwen \
+  --model-path "$RECONAV_MODEL_ROOT/qwen" --port 8009
+```
+
+For Gemma, stop both Qwen services and use all four GPUs:
+
+```bash
 CUDA_VISIBLE_DEVICES=0,1,2,3 .venv-server/bin/python -m reconav.serve gemma \
   --model-path "$RECONAV_MODEL_ROOT/gemma" --port 8008
 ```
@@ -46,17 +61,20 @@ reconav run --config configs/qwen.json --methods Qwen-ReCoNav \
   --tokenizer-path "$RECONAV_MODEL_ROOT/qwen" --output outputs/qwen-one
 ```
 
-For all six variants and all 192 tasks:
+For all six variants and all 192 tasks, use both Qwen services with eight task workers:
 
 ```bash
 reconav run --config configs/qwen.json \
   --methods Qwen-Direct Qwen-Direct-Feedback Qwen-Direct-ID-Sequence \
     Qwen-No-Verify-Repair Qwen-Forced-Early Qwen-ReCoNav \
-  --split all --qwen-base-url http://127.0.0.1:8008/v1 \
+  --split all --task-workers 8 \
+  --qwen-base-url http://127.0.0.1:8008/v1 http://127.0.0.1:8009/v1 \
   --tokenizer-path "$RECONAV_MODEL_ROOT/qwen" --output outputs/qwen-all
 ```
 
-For Gemma, use `configs/gemma.json`, replace the `Qwen-` selectors with `Gemma-`, set the Gemma tokenizer path, and choose `outputs/gemma-all`. Use a single selector to run just one method or ablation.
+For Gemma, use `configs/gemma.json`, replace the `Qwen-` selectors with `Gemma-`, set the Gemma tokenizer path, use `--task-workers 4` and only the port-8008 endpoint, and choose `outputs/gemma-all`. Use a single selector to run just one method or ablation.
+
+On two GPUs, launch one Qwen service and use `--task-workers 4` with only its endpoint. The backbone profiles default to one task worker for serial runs; the commands above set the paper's parallelism. Keep `--method-workers 1`.
 
 Use `--split hard44` for Hard44 or `--task-ids ID [ID ...]` for specific tasks. Add `--dry-run` to inspect selection before making model calls. To resume, repeat the identical command with `--resume`. A new configuration or task selection uses a new output directory.
 
