@@ -40,10 +40,15 @@ def execute(command, cell, name, env, timeout, budget=None):
     if executable.parent.name == 'bin':
         env['LD_LIBRARY_PATH'] = str(executable.parent.parent / 'lib') + (':' + env['LD_LIBRARY_PATH'] if env.get('LD_LIBRARY_PATH') else '')
     if env.get('RECONAV_BASELINE') == 'canav' or '/envs/canav/' in str(executable):
-        env.update(LD_PRELOAD=str(release_paths.environment_path('canav', 'lib/libstdc++.so.6')), PYTHONPATH=':'.join(map(str, [ROOT, release_paths.upstream_path('CA-Nav-code'), release_paths.upstream_path('habitat-lab-canav'), release_paths.upstream_path('GroundingDINO-canav'), release_paths.upstream_path('segment-anything-canav')])))
+        preload = [str(release_paths.environment_path('canav', 'lib/libstdc++.so.6'))]
+        env['PYTHONPATH'] = ':'.join(map(str, [ROOT, release_paths.upstream_path('CA-Nav-code'), release_paths.upstream_path('habitat-lab-canav'), release_paths.upstream_path('GroundingDINO-canav'), release_paths.upstream_path('segment-anything-canav')]))
         if rendering_backend(env) == 'mesa':
             env['__GLX_VENDOR_LIBRARY_NAME'] = 'mesa'
-            env['LD_PRELOAD'] += ':' + os.environ.get('RECONAV_MESA_GLX_LIBRARY', 'libGLX_mesa.so.0')
+            preload.append(env.get('RECONAV_MESA_GLX_LIBRARY', 'libGLX_mesa.so.0'))
+        else:
+            preload.extend(env.get('RECONAV_CANAV_GL_PRELOAD', '').split(':'))
+        preload.extend(env.get('LD_PRELOAD', '').replace(' ', ':').split(':'))
+        env['LD_PRELOAD'] = ':'.join(dict.fromkeys(value for value in preload if value))
     with (cell / (name + '.log')).open('w') as log:
         proc = subprocess.Popen(command, cwd=ROOT, env=env, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
         code = wait_process(proc, timeout, budget, cell,

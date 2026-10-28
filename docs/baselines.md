@@ -140,6 +140,21 @@ conda install --freeze-installed -c aihabitat \
   habitat-sim=0.3.3 habitat-sim-mutex=1.0=headless_nobullet
 ```
 
+For CA-Nav's Habitat 0.2.1, select the headless simulator build explicitly; changing only the mutex can leave the display build installed:
+
+```bash
+conda install --freeze-installed -c aihabitat \
+  'habitat-sim=0.2.1=py3.8_headless_linux_*' habitat-sim-mutex=1.0=headless_nobullet
+```
+
+If CA-Nav reports `GL::Context: cannot retrieve OpenGL version` with NVIDIA EGL, its older Conda OpenGL libraries may conflict with the system driver. Load the host's GLVND libraries before the worker starts. On Ubuntu x86-64, for example (adjust paths for your host):
+
+```bash
+export RECONAV_CANAV_GL_PRELOAD=/lib/x86_64-linux-gnu/libGLdispatch.so.0:/lib/x86_64-linux-gnu/libEGL.so.1:/lib/x86_64-linux-gnu/libOpenGL.so.0
+```
+
+The CA-Nav launcher combines these libraries with its C++ runtime and preserves existing `LD_PRELOAD` entries. Run identities record the preload setting.
+
 Native launchers render on the GPU selected by `--gpu`. NavGPT/MapGPT use `RECONAV_RENDER_GPU` (default `0`, EGL device index). Run identities record rendering settings. NavGPT/MapGPT also write OpenGL information to `rendering.json`; Habitat prints its renderer in the worker log. Keep the same rendering backend for a timed comparison.
 
 Place model assets under these external-root locations:

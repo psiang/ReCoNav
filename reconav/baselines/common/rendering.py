@@ -31,5 +31,6 @@ def simulator_gpu_id():
 def configuration(environment=None):
     env = os.environ if environment is None else environment
     keys = ('CUDA_VISIBLE_DEVICES', 'EGL_DEVICE_ID', 'PYOPENGL_PLATFORM',
-            'LIBGL_ALWAYS_SOFTWARE', 'EGL_PLATFORM', '__EGL_VENDOR_LIBRARY_FILENAMES')
+            'LIBGL_ALWAYS_SOFTWARE', 'EGL_PLATFORM', '__EGL_VENDOR_LIBRARY_FILENAMES',
+            'RECONAV_CANAV_GL_PRELOAD', 'LD_PRELOAD')
     return {'backend': backend(env), **{key: env.get(key) for key in keys}}
