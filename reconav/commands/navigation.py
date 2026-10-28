@@ -74,6 +74,8 @@ def main():
     if args.served_max_model_len is not None and args.served_max_model_len < 1:
         parser.error('--served-max-model-len must be positive')
     provider = normalize_provider(args.provider)
+    for name, value in (("QWEN_TIMEOUT_S", "1800"), ("OPENAI_TIMEOUT_S", "240"), ("GEMINI_TIMEOUT_S", "600")):
+        os.environ.setdefault(name, value)
     if provider != 'qwen' and (args.tokenizer_path is not None or args.served_max_model_len is not None):
         parser.error('--tokenizer-path and --served-max-model-len require the local qwen provider (Qwen or Gemma)')
     methods = tuple(args.methods or methods_for_provider(provider))
@@ -155,6 +157,8 @@ def main():
         if not os.environ.get('GEMINI_API_KEY'):
             parser.error('GEMINI_API_KEY is required for --provider gemini')
         model_info = {'provider': 'gemini', 'endpoint': args.gemini_base_url, 'served_model': runtime_model['model'], 'runtime_model': runtime_model}
+    timeout_variable = {'qwen': 'QWEN_TIMEOUT_S', 'openai': 'OPENAI_TIMEOUT_S', 'gemini': 'GEMINI_TIMEOUT_S'}[provider]
+    model_info['request_timeout_seconds'] = float(os.environ[timeout_variable])
     config = RuntimeConfig(max_tokens=args.max_tokens, seed=args.seed, temperature=args.temperature, top_p=args.top_p, top_k=args.top_k, min_p=args.min_p, presence_penalty=args.presence_penalty, repetition_penalty=args.repetition_penalty, enable_thinking=args.enable_thinking, max_input_characters=args.max_input_characters, scene_geometry=args.scene_geometry, solver_seconds=args.solver_seconds, resolution_seconds=args.resolution_seconds, max_assignments=args.max_assignments, repair_rounds=args.repair_rounds, feedback_rounds=args.feedback_rounds, tokenizer_name_or_path=None if tokenizer_path is None else str(tokenizer_path), served_max_model_len=None if served_max_model_len is None else int(served_max_model_len), context_safety_margin=args.context_safety_margin)
     summary = run_experiment(tasks_root=args.tasks_root, asg_root=args.asg_root, task_data_source=args.task_data_source, asg_data_source=args.asg_data_source, output=args.output, results_root=args.results_root, methods=methods, config=config, scenes=args.scenes, task_ids=args.task_ids, limit=args.limit, resume=args.resume, prediction_only=args.prediction_only, reference_seconds=args.reference_seconds, model_info=model_info, method_workers=args.method_workers, task_workers=args.task_workers, qwen_base_urls=qwen_base_urls, task_order=args.task_order)
     print(json.dumps(summary['main_table_metrics'], indent=2, ensure_ascii=False))

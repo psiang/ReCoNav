@@ -76,6 +76,8 @@ For Gemma, use `configs/gemma.json`, replace the `Qwen-` selectors with `Gemma-`
 
 On two GPUs, launch one Qwen service and use `--task-workers 4` with only its endpoint. The backbone profiles default to one task worker for serial runs; the commands above set the paper's parallelism. Keep `--method-workers 1`.
 
+HTTP request timeouts are 1,800 seconds for Qwen/Gemma, 240 seconds for OpenAI and 600 seconds for Gemini. Override them with `QWEN_TIMEOUT_S`, `OPENAI_TIMEOUT_S` and `GEMINI_TIMEOUT_S`, respectively.
+
 Use `--split hard44` for Hard44 or `--task-ids ID [ID ...]` for specific tasks. Add `--dry-run` to inspect selection before making model calls. To resume, repeat the identical command with `--resume`. A new configuration or task selection uses a new output directory.
 
 ## Closed-model backbones
