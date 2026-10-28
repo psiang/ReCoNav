@@ -212,6 +212,13 @@ def run(frontend, records, world, output):
             plan_attempts.append(jsonable(result))
             return result
     planner.update(fmt=SimpleNamespace(FMTPlanner=GraphFMT), generate_tpsm=generate_tpsm, get_obstacle_map_pointcloud=obstacles, generate_obstacle_map=obstacle_map, save_progressive_planning_step_artifacts=lambda *a, **kw: None)
+    native_step_action = planner['get_step_action_type']
+
+    def step_action(values, encoding_map):
+        if not any(value == 0 and symbol in encoding_map for symbol, value in values.items()):
+            raise PredictionFailure('original_LIMP_transition_has_no_executable_positive_predicate')
+        return native_step_action(values, encoding_map)
+    planner['get_step_action_type'] = step_action
     native_motion = planner['motion_level_planning']
 
     def motion(*args, **kwargs):
