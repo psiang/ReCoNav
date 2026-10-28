@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import shlex
 import subprocess
+import sys
 
 
 def main(argv=None):
@@ -29,7 +30,7 @@ def main(argv=None):
     if parallel < 1 or not 1 <= args.port <= 65535:
         parser.error("invalid tensor parallel size or port")
     context = 131072 if args.external_vision or not qwen else 192000
-    command = ["vllm", "serve", str(model), "--host", "127.0.0.1", "--port", str(args.port),
+    command = [sys.executable, "-m", "vllm.entrypoints.cli.main", "serve", str(model), "--host", "127.0.0.1", "--port", str(args.port),
                "--served-model-name", "qwen3.8-27b" if qwen else "gemma4-31b",
                "--tensor-parallel-size", str(parallel), "--max-model-len", str(context),
                "--max-num-seqs", "1" if args.external_vision else "4",

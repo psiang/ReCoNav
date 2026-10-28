@@ -9,7 +9,6 @@ Use a separate Python 3.12 environment for vLLM:
 ```bash
 python3.12 -m venv .venv-server
 .venv-server/bin/python -m pip install -r environments/server.lock
-.venv-server/bin/python -m pip install --no-deps -e .
 python -m pip install '.[models]'
 export RECONAV_MODEL_ROOT=/absolute/path/to/models
 ```
