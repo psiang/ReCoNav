@@ -25,6 +25,15 @@ _BACKEND_CODES = {
     "UPSTREAM_INFRASTRUCTURE_FAILURE",
 }
 
+# These identifiers are part of the paper's model inputs.
+_MODEL_CHECKPOINTS = {
+    "contract_validation": "L3-S1",
+    "label_grounding": "L3-G",
+    "scene_binding": "L3-B",
+    "route_lowering": "L3-L",
+    "route_verification": "L3-X",
+}
+
 
 def repair_eligibility(
     *,
@@ -53,7 +62,7 @@ def build_error(diagnostics: Sequence[VerificationDiagnostic | Mapping[str, Any]
     return [
         {
             "code": item["code"],
-            "checkpoint": item["checkpoint"],
+            "checkpoint": _MODEL_CHECKPOINTS[item["checkpoint"]],
             "category": item["category"],
             "assertion": item["assertion"],
             "expected": item.get("expected"),
@@ -71,9 +80,9 @@ def build_warnings(
     return [
         {
             "code": item["code"],
-            "checkpoint": item["checkpoint"],
+            "checkpoint": _MODEL_CHECKPOINTS[item["checkpoint"]],
             "category": item["category"],
-            "node_or_path": item["node_or_path"],
+            "node_or_path": "$.layer1" if item["node_or_path"] == "$.label_grounding" else item["node_or_path"],
             "assertion": item["assertion"],
             "expected": item.get("expected"),
             "observed": item.get("observed"),

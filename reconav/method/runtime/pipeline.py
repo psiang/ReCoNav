@@ -511,7 +511,7 @@ class NavigationPipeline:
                     direct_prompt(),
                     prompt_payload(
                         request,
-                        scene.public_view(self.config.scene_geometry),
+                        scene.model_view(self.config.scene_geometry),
                     ),
                     response_format=response_format(
                         DirectDecision, "direct_navigation_contract"
@@ -1025,7 +1025,7 @@ class NavigationPipeline:
                 "instruction": request.instruction,
                 "original_start": request.robot_position,
                 "start_heading": request.heading,
-                "asg": scene.public_view(self.config.scene_geometry),
+                "asg": scene.model_view(self.config.scene_geometry),
                 "previous_raw_response": attempt.raw_response,
                 "mechanical_feedback": feedback,
             }
@@ -1165,7 +1165,7 @@ class NavigationPipeline:
                 direct_id_sequence_prompt(),
                 prompt_payload(
                     request,
-                    scene.public_view(self.config.scene_geometry),
+                    scene.model_view(self.config.scene_geometry),
                 ),
                 response_format=response_format(
                     DirectIDSequenceDecision, "direct_id_sequence"

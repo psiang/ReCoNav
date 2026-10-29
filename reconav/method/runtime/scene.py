@@ -141,6 +141,11 @@ class SceneContext:
         self._views[geometry_mode] = view
         return view
 
+    def model_view(self, geometry_mode: str = "compact") -> dict:
+        """Use the scene identifier present in the paper's core model requests."""
+        source = "hm3dsem_manual_gt" if self.data_source == "hm3dsem" else self.data_source
+        return {**self.public_view(geometry_mode), "data_source": source}
+
 
 class DirectorySceneProvider:
     def __init__(self, root: Path, data_source: str):

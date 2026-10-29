@@ -15,6 +15,8 @@ class _StrictModel(BaseModel):
 class RepairOutput(_StrictModel):
     """Complete semantic and label-level artifact; never scene-instance IDs."""
 
+    model_config = ConfigDict(title="Layer4RepairOutput")
+
     semantic_contract: SceneIndependentSemanticContract
     grounding_bindings: list[GroundingBinding]
 
@@ -23,7 +25,7 @@ def repair_response_format() -> dict:
     return {
         "type": "json_schema",
         "json_schema": {
-            "name": "repair_output",
+            "name": "layer4_repair_output",
             "strict": True,
             "schema": RepairOutput.model_json_schema(),
         },
