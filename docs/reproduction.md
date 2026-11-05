@@ -104,7 +104,7 @@ The profiles specify GPT-5.6 Sol with high reasoning effort and Gemini 3.1 Pro P
 
 Follow [baseline setup and commands](baselines.md) for the selected policy. The paper includes ten method/interface combinations: NavGPT native/+ASG, MapGPT native, CA-Nav native, GC-VLN native/+ASG, SNav native, DualVLN native, Lang2LTL-2+ASG and LIMP+ASG. External generative calls use Qwen; SNav and DualVLN use their own checkpoints. Lang2LTL-2 also uses local T5 and the embedding cache/API described in the baseline manual.
 
-For a fresh full reproduction, run each selected external method with `--split all --time-limit-seconds 0`. This collects uncapped results for all supported tasks; the report applies the main table's 300-second cutoff afterward and also reports Hard44. Native action limits, solver bounds and model settings remain in effect. Repeat an interrupted external command to resume; after fixing an execution error, add `--retry-failed`.
+For a full reproduction, run each selected external method with `--split all --time-limit-seconds 0`. Keep the method's action limits, solver budgets and model settings. Repeat an interrupted external command to resume; after fixing an execution error, add `--retry-failed`.
 
 ## Reports
 
@@ -118,6 +118,20 @@ reconav summarize --runs outputs/qwen-all outputs/gemma-all \
 
 Add other external or closed-model run directories as available. For a one-task check, add `--task-ids ID`; for a Hard44-only run, add `--split hard44`. Omit unrun methods. Each task/method must come from one input run.
 
-The report contains `rows.json`, `summary.json`, `metrics.csv`, `paired.csv` and `report.md`. Resolving/control groups are computed automatically from task metadata. Rates in JSON/CSV are fractions; Markdown shows percentages. Main and Hard44 quality use fixed supported populations (192 ASG / 178 native for all tasks, 44 for Hard44); timeouts, exhausted budgets and terminal runtime failures contribute zero. Ablation quality and costs use completed runs. Prefer uses preference-applicable tasks. Missing or unfinished tasks keep a view pending; finish them and repeat the report command. Per-task errors are retained in `rows.json`. Each experiment also saves its own manifest, predictions, scores and summary.
+The report contains `rows.json`, `summary.json`, `metrics.csv`, `paired.csv` and `report.md`. The `main` view covers the selected tasks, and `hard44` covers their intersection with Hard44. Rates in JSON/CSV are fractions; Markdown shows percentages.
+
+Full IS requires a physically valid route satisfying required visits, orders, hard constraints and all explicit preferences. Hard NS omits preference checks. Prefer averages the satisfied fraction of preference clauses over tasks containing preferences, independently of hard-constraint success.
+
+For full runs, the task populations are:
+
+| Comparison | Full IS / Hard NS | Prefer | Run completion |
+|---|---:|---:|---:|
+| Main, native interfaces | 178 | 51 | 192 |
+| Main and ablations, ASG methods | 192 | 54 | 192 |
+| Hard44, every method | 44 | 4 | 44 |
+
+Budget failures and runtime exceptions score zero in these fixed populations. Completed runs include incorrect outcomes and native step-limit terminations. Token and time means use completed runs. The Forced-Early/ReCoNav comparison in `paired.csv` uses all 89 resolving tasks and all 103 control tasks, with failures scored zero separately for each method. Task selections restrict each population to the selected IDs.
+
+Missing or unfinished tasks keep a view pending; finish them and repeat the report command. A run stopped by a wall-time limit must be rerun to obtain its complete result. Per-task errors are retained in `rows.json`. Each experiment also saves its own manifest, predictions, scores and summary.
 
 See the paper for reported results.

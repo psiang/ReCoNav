@@ -6,7 +6,7 @@ def mean(rows, key):
 
 def aggregate(rows, total, complete):
     done = [r for r in rows if complete(r)]
-    return dict(planned=total, observed=len(rows), completed=len(done), completion_rate=len(done) / total, means={key: mean(done, key) for key in ('full_is', 'hard_ns', 'prefer', 'seconds', 'total_tokens')})
+    return dict(planned=total, observed=len(rows), completed=len(done), completion_rate=len(done) / total, means={key: mean(done, key) for key in ('seconds', 'total_tokens')})
 
 def scoring_complete(row):
     return row['execution_status'] == 'completed' and row.get('scoring_completed') and (not row.get('resource_reason'))

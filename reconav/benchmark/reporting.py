@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from collections import Counter
 import csv
+from decimal import Decimal, ROUND_HALF_UP
 from importlib.resources import files
 import json
 import math
@@ -12,7 +13,8 @@ from reconav.benchmark.accounting import aggregate, fixed_quality, scoring_compl
 from reconav.benchmark.selection import task_ids
 
 
-METRICS = ("full_is", "hard_ns", "prefer", "seconds", "total_tokens")
+QUALITY_METRICS = ("full_is", "hard_ns", "prefer")
+COST_METRICS = ("seconds", "total_tokens")
 TERMINAL = {"completed", "timeout", "resource_exhausted", "unsupported_input", "failed"}
 EXTERNAL_METHOD_NAMES = {
     "navgpt": "NavGPT", "mapgpt": "MapGPT", "canav": "CA-Nav",
@@ -118,18 +120,8 @@ def check_row(row, preferences):
     return None
 
 
-def report_view(rows, population, supported, preferences, cap=None):
-    selected = []
-    for source in rows:
-        if source["task_id"] not in population:
-            continue
-        row = dict(source)
-        seconds = row.get("seconds")
-        # An infrastructure error remains an error even if it took over 300 s.
-        if cap is not None and row["execution_status"] in {"completed", "timeout", "resource_exhausted"} and isinstance(seconds, (int, float)) and seconds > cap:
-            row.update(execution_status="timeout", scoring_completed=False,
-                       resource_reason=f"uniform_{cap:g}s_retrospective_censoring")
-        selected.append(row)
+def report_view(rows, population, supported, preferences):
+    selected = [dict(row) for row in rows if row["task_id"] in population]
     by_id = {r["task_id"]: r for r in selected}
     missing = sorted(supported - by_id.keys())
     issues = []
@@ -138,10 +130,8 @@ def report_view(rows, population, supported, preferences, cap=None):
         reason = check_row(row, preferences)
         policy = row.get("time_protocol") or {}
         limit = policy.get("limit_seconds")
-        if row["execution_status"] == "timeout" and (row.get("resource_reason") or "").startswith("uniform_"):
-            pass
-        elif row["execution_status"] == "timeout" and limit and (cap is None or limit < cap):
-            reason = f"source wall limit {limit:g}s is shorter than this report's horizon"
+        if row["execution_status"] == "timeout" and limit:
+            reason = f"source wall limit {limit:g}s prevented a complete run"
         if reason:
             issues.append(dict(task_id=task, reason=reason))
     summary = aggregate(selected, len(population), scoring_complete)
@@ -190,11 +180,11 @@ def summarize(data, runs, output, split="all", requested=()):
         rows = list(group["rows"].values())
         flat.extend(dict(**label, **r) for r in rows if r["task_id"] in selected)
         supported = selected & (native if condition == "native" else all_ids)
-        views = [("uncapped", selected, None), ("main_300s", selected, 300), ("hard44_uncapped", selected & hard, None)]
-        for view, population, cap in views:
+        views = [("main", selected), ("hard44", selected & hard)]
+        for view, population in views:
             if not population:
                 continue
-            result = report_view(rows, population, supported & population, preferences, cap)
+            result = report_view(rows, population, supported & population, preferences)
             reports.append(dict(**label, view=view, **result))
     paired = []
     for kind, model, method, condition in sorted(groups):
@@ -210,39 +200,47 @@ def summarize(data, runs, output, split="all", requested=()):
             population = selected & members
             if not population:
                 continue
-            pairs = [t for t in sorted(population) if t in early["rows"] and t in reconav["rows"]
-                     and all(not check_row(g["rows"][t], preferences) and scoring_complete(g["rows"][t]) for g in (early, reconav))]
-            paired.append(dict(model=model, group=name, planned=len(population), paired_completed=len(pairs),
-                               forced_early_successes=sum(early["rows"][t]["full_is"] for t in pairs),
-                               reconav_successes=sum(reconav["rows"][t]["full_is"] for t in pairs)))
+            comparisons = [report_view(list(g["rows"].values()), population, population, preferences)
+                           for g in (early, reconav)]
+            paired.append(dict(model=model, group=name, planned=len(population),
+                               ready=all(r["ready"] for r in comparisons),
+                               forced_early_completed=comparisons[0]["completed"],
+                               reconav_completed=comparisons[1]["completed"],
+                               forced_early_successes=(comparisons[0]["fixed_quality"]["full_is"]["numerator"]
+                                                      if comparisons[0]["ready"] else None),
+                               reconav_successes=(comparisons[1]["fixed_quality"]["full_is"]["numerator"]
+                                                  if comparisons[1]["ready"] else None)))
     output.mkdir(parents=True, exist_ok=True)
     document = dict(task_ids=sorted(selected), reports=reports, paired=paired)
     (output / "summary.json").write_text(json.dumps(document, indent=2) + "\n")
     (output / "rows.json").write_text(json.dumps(sorted(flat, key=lambda r: (r["kind"], r["model"], r["method"], r["condition"], r["task_id"])), indent=2) + "\n")
     columns = ["kind", "model", "method", "condition", "view", "ready", "planned", "observed", "supported", "completed", "quality_denominator", "prefer_denominator", "completion_rate", "timeout_rate"]
-    columns += [f"{scope}_{key}" for scope in ("fixed", "completed") for key in METRICS]
+    columns += ["fixed_" + key for key in QUALITY_METRICS]
+    columns += ["completed_" + key for key in COST_METRICS]
     with (output / "metrics.csv").open("w", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=columns)
         writer.writeheader()
         for r in reports:
             row = {k: r.get(k) for k in columns}
-            for key in METRICS:
+            for key in QUALITY_METRICS:
                 row["fixed_" + key] = (r.get("fixed_quality") or {}).get(key, {}).get("mean")
+            for key in COST_METRICS:
                 row["completed_" + key] = r["means"][key]["mean"]
             writer.writerow(row)
     with (output / "paired.csv").open("w", newline="") as stream:
-        writer = csv.DictWriter(stream, fieldnames=["model", "group", "planned", "paired_completed", "forced_early_successes", "reconav_successes"])
+        writer = csv.DictWriter(stream, fieldnames=["model", "group", "planned", "ready", "forced_early_completed", "reconav_completed", "forced_early_successes", "reconav_successes"])
         writer.writeheader()
         writer.writerows(paired)
     lines = ["# Experiment results", "", f"Selected tasks: {len(selected)}.", "",
              "| View | Model / method | Ready | Completed / planned | Full IS (%) | Hard NS (%) | Prefer (%) | Tokens (k) | Time (s) |",
              "|---|---|---|---:|---:|---:|---:|---:|---:|"]
     def fmt(v, scale=1):
-        return "—" if v is None else f"{v * scale:.2f}"
+        if v is None:
+            return "—"
+        return str((Decimal(str(v)) * Decimal(str(scale))).quantize(
+            Decimal("0.01"), rounding=ROUND_HALF_UP))
     for r in reports:
         scores = r.get("fixed_quality") or {}
-        if r["view"] == "uncapped" and r["kind"] == "internal":
-            scores = r["means"]
         lines.append("| " + " | ".join([r["view"], f"{r['model']} / {r['method']} ({r['condition']})",
                      "yes" if r["ready"] else "pending", f"{r['completed']} / {r['planned']}",
                      *[fmt(scores.get(k, {}).get("mean"), 100) for k in ("full_is", "hard_ns", "prefer")],
@@ -252,8 +250,11 @@ def summarize(data, runs, output, split="all", requested=()):
             lines.extend(["", f"{r['view']} / {r['model']} / {r['method']} ({r['condition']}): "
                           f"{len(r['missing_tasks'])} missing, {len(r['issues'])} errors. Details: summary.json."])
     if paired:
-        lines.extend(["", "## Forced-Early → ReCoNav", "", "| Model | Group | Paired / planned | Forced-Early successes | ReCoNav successes |", "|---|---|---:|---:|---:|"])
-        lines.extend(f"| {r['model']} | {r['group']} | {r['paired_completed']} / {r['planned']} | {r['forced_early_successes']} | {r['reconav_successes']} |" for r in paired)
+        lines.extend(["", "## Forced-Early → ReCoNav", "", "| Model | Group | Ready | Forced-Early Full IS | ReCoNav Full IS |", "|---|---|---|---:|---:|"])
+        for r in paired:
+            counts = ["—" if r[key] is None else f"{r[key]:g} / {r['planned']}"
+                      for key in ("forced_early_successes", "reconav_successes")]
+            lines.append(f"| {r['model']} | {r['group']} | {'yes' if r['ready'] else 'pending'} | {counts[0]} | {counts[1]} |")
     (output / "report.md").write_text("\n".join(lines) + "\n")
     return dict(methods=len(groups), views=len(reports), selected_tasks=len(selected),
                 ready_views=sum(r["ready"] for r in reports), output=str(output))

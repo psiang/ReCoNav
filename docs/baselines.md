@@ -278,7 +278,7 @@ Use the following launcher arguments for the paper's ten combinations. Prepare t
 | Lang2LTL-2 +ASG | `reconav.baselines.runners.formal` | `--method lang2ltl2 --condition asg` |
 | LIMP +ASG | `reconav.baselines.runners.formal` | `--method limp --condition asg` |
 
-For example, run NavGPT +ASG on all tasks without an added wall-time cap:
+For example, run NavGPT +ASG on all tasks:
 
 ```bash
 python -m reconav.baselines.runners.prepare --output "$RECONAV_CACHE_ROOT/external/assets"
@@ -298,12 +298,12 @@ For example, after SNav setup:
 python -m reconav.baselines.runners.native smoke --method snav --task 00873_T4_0003 \
   --gpu 0 --output outputs/snav-one
 
-# Hard44 with the paper's uncapped protocol
+# Hard44
 python -m reconav.baselines.runners.native run --method snav --split hard44 \
-  --time-protocol "configs/protocols/hard44.json" --partition hard \
+  --time-limit-seconds 0 \
   --gpu 0 --output outputs/snav-hard44
 ```
 
-Choose timing separately from `--split`. For the paper's original external execution protocol, add `--time-protocol "configs/protocols/main.json"`. For Hard44, add `--time-protocol "configs/protocols/hard44.json" --partition hard`. For fresh full runs, use `--time-limit-seconds 0` and collect the new results with `reconav summarize --runs <run-output> --output outputs/report`; this also produces the retrospective 300-second comparison.
+Use `--time-limit-seconds 0` for paper experiments. Collect results with `reconav summarize --runs <run-output> --output outputs/report`. The report includes the main comparison and Hard44 within your selected tasks.
 
 GC-VLN appends poses to `trajectory.jsonl` and exports `trajectory.json` at episode end. Its `runtime_summary.json` reports trajectory-recording time under `recording.trajectory.seconds` and diagnostic JSON write time under `recording.instrumentation_write_seconds`. Both remain included in the episode's wall time.

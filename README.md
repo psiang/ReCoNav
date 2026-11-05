@@ -2,9 +2,9 @@
 
 Code for **ReCoNav: Reliable Constrained Long-Horizon Vision-and-Language Navigation via a Determination Engine**.
 
-- **Scene-grounded benchmark** provides 192 tasks across nine HM3DSem scenes to evaluate scoped hard constraints and preferences and their role in target selection.
-- **Instruction contract** couples target selection with whole-route satisfaction under scoped hard constraints and preferences.
-- **ReCoNav** derives, verifies, and revises interdependent commitments using scene and route evidence through its Determination Engine.
+- **Scene-grounded benchmark** provides 192 tasks across nine HM3DSem scenes to evaluate joint target and route satisfaction under scoped hard and soft constraints.
+- **Instruction contract** jointly represents visits, their order, and scoped hard and soft constraints for target and route selection.
+- **Determination Engine** uses scene and task rules to propagate constraints across instruction interpretation, scene grounding, and complete-route planning. It derives and verifies judgments and supplies evidence for VLM repair.
 
 ## Citation
 
@@ -21,7 +21,7 @@ If you use ReCoNav or its benchmark, please cite:
 
 ## Benchmark
 
-The benchmark contains **192 tasks in nine HM3DSem scenes**, with final ASGs, physical navigation geometry, annotations and evaluation splits. **Hard44** is the 44-task constraint-resolving subset. Native simulator methods support 178 starts; ASG methods support all 192. Tasks are stored at `benchmark/tasks/hm3dsem/<scene>/<task>.json`; scene assets are at `benchmark/scenes/hm3dsem/<scene>/`.
+The benchmark contains **192 tasks in nine HM3DSem scenes**, with ground-truth ASGs, physical navigation geometry, annotations and evaluation splits. Hard constraints determine the target in 51 tasks, preferences in 38, and local qualifiers or direct references in the remaining 103. **Hard44** contains the 44 hard-constraint-resolving tasks whose starts are supported by every evaluated method. Native simulator methods support 178 starts; ASG methods support all 192. Tasks are stored at `benchmark/tasks/hm3dsem/<scene>/<task>.json`; scene assets are at `benchmark/scenes/hm3dsem/<scene>/`.
 
 Download `reconav-benchmark-v1.0.0.tar.gz` from [Hugging Face](https://huggingface.co/datasets/psiang/ReCoNavBench). Accept the dataset terms on its page, then run:
 
@@ -141,7 +141,7 @@ reconav summarize --runs outputs/qwen-reconav outputs/external/navgpt-asg \
   --output outputs/report
 ```
 
-This writes per-task records, CSV tables and `report.md` for the selected tasks, the 300-second main comparison, Hard44 and internal ablations. See [reproduction](docs/reproduction.md) for selection and resume commands.
+This writes per-task records, CSV tables and `report.md` for the main comparison, Hard44 and internal ablations within the selected tasks. See [reproduction](docs/reproduction.md#reports) for metric definitions and task populations.
 
 ## Expected results
 
